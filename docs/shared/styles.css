@@ -3,8 +3,8 @@
 html, body { margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #fafafa;
-  color: #1a1a1a;
+  background: #f5f1e8;
+  color: #1a2520;
   -webkit-text-size-adjust: 100%;
 }
 button { font: inherit; cursor: pointer; }
