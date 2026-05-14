@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Daily Drill</title>
+<style>
+  :root {
+    --bg: #f5f1e8;
+    --ink: #1a1a1a;
+    --muted: #6b6358;
+    --accent: #c4452d;
+    --correct: #2d6b3f;
+    --soft: #e8dfcc;
+    --card: #ffffff;
+    --shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(60,40,20,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px 20px 24px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--soft);
+    margin-bottom: 24px;
+    min-height: 28px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .progress {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .back-btn:hover { color: var(--ink); }
+
+  /* Picker */
+  .picker-intro {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .deck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .deck-card {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 6px;
+    padding: 20px 22px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow);
+    width: 100%;
+  }
+  .deck-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .deck-card:active { transform: scale(0.99); }
+  .deck-name {
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .deck-meta {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .deck-blurb {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  /* Session */
+  .stage { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .card-num {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .prompt {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 40px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+  }
+  .hangul {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 44px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-family: inherit;
+    font-size: 17px;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    line-height: 1.3;
+  }
+  .opt:active { transform: scale(0.99); }
+  .opt.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
+  .opt.wrong { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .opt.dim { opacity: 0.4; }
+  .opt:disabled { cursor: default; }
+  .next-bar { margin-top: 24px; text-align: center; min-height: 48px; }
+  .next-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 28px;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .next-btn.show { opacity: 1; }
+
+  /* Done */
+  .done { text-align: center; padding: 40px 20px; }
+  .done-num {
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--correct);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+  }
+  .done-label {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .review-section { text-align: left; margin-bottom: 28px; }
+  .review-title {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .review-item {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    gap: 12px;
+  }
+  .review-item .ko {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+  }
+  .review-item .en {
+    color: var(--muted);
+    font-style: italic;
+    text-align: right;
+  }
+  .done-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 28px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn-secondary {
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 14px 24px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div id="leftHeader"></div>
+    <div class="progress" id="progress"></div>
+  </header>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script src="../shared/logger.js"></script>
+<script>
+// ============================================================
+// DECKS
+// To add a new deck: append an object below. Each deck has
+//   id (unique), name, blurb, cards: [{ko, en}]
+// ============================================================
+const DECKS = [
+  {
+    id: 'mixed',
+    name: 'Mixed essentials',
+    blurb: 'Cafes, transport, daily verbs, places. The general pool.',
+    cards: [
+      { ko: '안녕하세요', en: 'hello (polite)' },
+      { ko: '감사합니다', en: 'thank you' },
+      { ko: '죄송합니다', en: "I'm sorry" },
+      { ko: '괜찮아요', en: "it's okay / I'm fine" },
+      { ko: '잠깐만요', en: 'just a moment' },
+      { ko: '여기요', en: 'excuse me / over here' },
+      { ko: '천천히', en: 'slowly' },
+      { ko: '빨리', en: 'quickly' },
+      { ko: '아메리카노', en: 'americano' },
+      { ko: '따뜻한', en: 'hot (warm)' },
+      { ko: '차가운', en: 'cold' },
+      { ko: '얼음', en: 'ice' },
+      { ko: '물', en: 'water' },
+      { ko: '커피', en: 'coffee' },
+      { ko: '맛있어요', en: "it's delicious" },
+      { ko: '매워요', en: "it's spicy" },
+      { ko: '주세요', en: 'please give me' },
+      { ko: '먹어요', en: 'eats / I eat' },
+      { ko: '마셔요', en: 'drinks / I drink' },
+      { ko: '계산서', en: 'the bill' },
+      { ko: '포장', en: 'takeaway' },
+      { ko: '집', en: 'house / home' },
+      { ko: '학교', en: 'school' },
+      { ko: '회사', en: 'company / office' },
+      { ko: '식당', en: 'restaurant' },
+      { ko: '카페', en: 'cafe' },
+      { ko: '편의점', en: 'convenience store' },
+      { ko: '지하철', en: 'subway' },
+      { ko: '버스', en: 'bus' },
+      { ko: '택시', en: 'taxi' },
+      { ko: '공항', en: 'airport' },
+      { ko: '병원', en: 'hospital' },
+      { ko: '은행', en: 'bank' },
+      { ko: '시장', en: 'market' },
+      { ko: '가요', en: 'goes / I go' },
+      { ko: '와요', en: 'comes / I come' },
+      { ko: '봐요', en: 'sees / I see' },
+      { ko: '읽어요', en: 'reads / I read' },
+      { ko: '써요', en: 'writes / I write' },
+      { ko: '들어요', en: 'listens / I listen' },
+      { ko: '말해요', en: 'speaks / I speak' },
+      { ko: '자요', en: 'sleeps / I sleep' },
+      { ko: '일어나요', en: 'gets up / wakes up' },
+      { ko: '쉬어요', en: 'rests / I rest' },
+      { ko: '공부해요', en: 'studies / I study' },
+      { ko: '일해요', en: 'works / I work' },
+      { ko: '운동해요', en: 'exercises / I exercise' },
+      { ko: '만나요', en: 'meets / I meet' },
+      { ko: '오늘', en: 'today' },
+      { ko: '어제', en: 'yesterday' },
+      { ko: '내일', en: 'tomorrow' },
+      { ko: '아침', en: 'morning' },
+      { ko: '점심', en: 'lunch / noon' },
+      { ko: '저녁', en: 'evening / dinner' },
+      { ko: '밤', en: 'night' },
+      { ko: '지금', en: 'now' },
+      { ko: '저', en: 'I (humble)' },
+      { ko: '친구', en: 'friend' },
+      { ko: '가족', en: 'family' },
+      { ko: '선생님', en: 'teacher' },
+      { ko: '학생', en: 'student' },
+      { ko: '좋아요', en: "it's good / I like it" },
+      { ko: '싫어요', en: "I don't like it" },
+      { ko: '많아요', en: "there's a lot" },
+      { ko: '적어요', en: "there's a little" },
+      { ko: '커요', en: "it's big" },
+      { ko: '작아요', en: "it's small" },
+      { ko: '비싸요', en: "it's expensive" },
+      { ko: '싸요', en: "it's cheap" },
+      { ko: '하나', en: 'one (native)' },
+      { ko: '둘', en: 'two (native)' },
+      { ko: '셋', en: 'three (native)' },
+      { ko: '얼마예요', en: 'how much is it?' },
+    ]
+  },
+
+  {
+    id: 'time',
+    name: 'Telling time',
+    blurb: 'Hours, minutes, parts of the day, asking and saying when.',
+    cards: [
+      // Hours — native Korean numbers + 시
+      { ko: '한 시', en: "one o'clock" },
+      { ko: '두 시', en: "two o'clock" },
+      { ko: '세 시', en: "three o'clock" },
+      { ko: '네 시', en: "four o'clock" },
+      { ko: '다섯 시', en: "five o'clock" },
+      { ko: '여섯 시', en: "six o'clock" },
+      { ko: '일곱 시', en: "seven o'clock" },
+      { ko: '여덟 시', en: "eight o'clock" },
+      { ko: '아홉 시', en: "nine o'clock" },
+      { ko: '열 시', en: "ten o'clock" },
+      { ko: '열한 시', en: "eleven o'clock" },
+      { ko: '열두 시', en: "twelve o'clock" },
+
+      // Minutes — Sino-Korean numbers + 분
+      { ko: '오 분', en: 'five minutes' },
+      { ko: '십 분', en: 'ten minutes' },
+      { ko: '십오 분', en: 'fifteen minutes' },
+      { ko: '이십 분', en: 'twenty minutes' },
+      { ko: '삼십 분', en: 'thirty minutes' },
+      { ko: '사십 분', en: 'forty minutes' },
+      { ko: '오십 분', en: 'fifty minutes' },
+      { ko: '반', en: 'half (past the hour)' },
+
+      // Combined times
+      { ko: '세 시 반', en: 'half past three (3:30)' },
+      { ko: '여섯 시 십오 분', en: 'six fifteen (6:15)' },
+      { ko: '일곱 시 삼십 분', en: 'seven thirty (7:30)' },
+      { ko: '아홉 시 사십오 분', en: 'nine forty-five (9:45)' },
+
+      // AM / PM and parts of day
+      { ko: '오전', en: 'AM / morning' },
+      { ko: '오후', en: 'PM / afternoon' },
+      { ko: '아침', en: 'morning (early)' },
+      { ko: '점심', en: 'noon / lunchtime' },
+      { ko: '저녁', en: 'evening' },
+      { ko: '밤', en: 'night' },
+      { ko: '새벽', en: 'dawn / early hours' },
+      { ko: '정오', en: 'midday / noon' },
+      { ko: '자정', en: 'midnight' },
+
+      // Asking and saying
+      { ko: '몇 시예요?', en: 'what time is it?' },
+      { ko: '지금 몇 시예요?', en: 'what time is it now?' },
+      { ko: '몇 시에 만나요?', en: 'what time shall we meet?' },
+      { ko: '세 시에 만나요', en: "let's meet at three" },
+      { ko: '오전 아홉 시', en: '9 AM' },
+      { ko: '오후 세 시', en: '3 PM' },
+      { ko: '나중에', en: 'later' },
+      { ko: '일찍', en: 'early' },
+      { ko: '늦게', en: 'late' },
+
+      // Useful related
+      { ko: '시간', en: 'time / hour (duration)' },
+      { ko: '분', en: 'minute' },
+      { ko: '초', en: 'second' },
+      { ko: '언제', en: 'when' },
+    ]
+  }
+];
+
+const SESSION_SIZE = 10;
+
+let activeDeck = null;
+let session = [];
+let currentIdx = 0;
+let sessionCorrect = 0;
+let missedThisSession = [];
+
+const stage = document.getElementById('stage');
+const progress = document.getElementById('progress');
+const leftHeader = document.getElementById('leftHeader');
+
+function shuffle(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============================================================
+// PICKER
+// ============================================================
+function renderPicker() {
+  leftHeader.innerHTML = `<span class="title">Daily Drill</span>`;
+  progress.textContent = '';
+
+  stage.innerHTML = `
+    <div class="picker-intro">Pick a deck</div>
+    <div class="deck-list" id="deckList"></div>
+  `;
+  const list = document.getElementById('deckList');
+  DECKS.forEach(deck => {
+    const btn = document.createElement('button');
+    btn.className = 'deck-card';
+    btn.innerHTML = `
+      <div class="deck-name">${deck.name}</div>
+      <div class="deck-meta">${deck.cards.length} cards</div>
+      <div class="deck-blurb">${deck.blurb}</div>
+    `;
+    btn.onclick = () => startSession(deck);
+    list.appendChild(btn);
+  });
+}
+
+// ============================================================
+// SESSION
+// ============================================================
+function buildSession() {
+  const cards = activeDeck.cards;
+  const sessionSize = Math.min(SESSION_SIZE, cards.length);
+  const shuffled = shuffle(cards);
+  session = shuffled.slice(0, sessionSize).map(card => {
+    const others = cards.filter(c => c.ko !== card.ko && c.en !== card.en);
+    const distractors = shuffle(others).slice(0, 3).map(c => c.en);
+    const options = shuffle([card.en, ...distractors]);
+    return { ...card, options };
+  });
+  currentIdx = 0;
+  sessionCorrect = 0;
+  missedThisSession = [];
+}
+
+function startSession(deck) {
+  activeDeck = deck;
+  buildSession();
+  renderCard();
+}
+
+function renderCard() {
+  const card = session[currentIdx];
+  leftHeader.innerHTML = `<button class="back-btn" id="backBtn">← Decks</button>`;
+  document.getElementById('backBtn').onclick = renderPicker;
+  progress.textContent = `${currentIdx + 1} / ${session.length}`;
+
+  stage.innerHTML = `
+    <div class="card-num">${activeDeck.name} · Card ${currentIdx + 1}</div>
+    <div class="prompt"><div class="hangul">${card.ko}</div></div>
+    <div class="options" id="opts"></div>
+    <div class="next-bar"><button class="next-btn" id="next">Next →</button></div>
+  `;
+
+  const optsEl = document.getElementById('opts');
+  card.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(btn, opt, card);
+    optsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, chosen, card) {
+  const allBtns = document.querySelectorAll('.opt');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === card.en;
+  if (isCorrect) {
+    btn.classList.add('correct');
+    sessionCorrect++;
+  } else {
+    btn.classList.add('wrong');
+    missedThisSession.push(card);
+    allBtns.forEach(b => {
+      if (b.textContent === card.en) b.classList.add('correct');
+      else if (b !== btn) b.classList.add('dim');
+    });
+  }
+
+  document.getElementById('next').classList.add('show');
+  document.getElementById('next').onclick = nextCard;
+}
+
+function nextCard() {
+  currentIdx++;
+  if (currentIdx >= session.length) renderDone();
+  else renderCard();
+}
+
+function renderDone() {
+  try { KoreanSuiteLogger.log('drill', { deckId: activeDeck && activeDeck.id, events: [{ type: 'session_complete', correct: sessionCorrect, total: session.length, missed: missedThisSession.length }] }); } catch(e){}
+  progress.textContent = `${session.length} / ${session.length}`;
+  const reviewHtml = missedThisSession.length
+    ? `<div class="review-section">
+         <div class="review-title">Review these</div>
+         ${missedThisSession.map(c =>
+           `<div class="review-item"><span class="ko">${c.ko}</span><span class="en">${c.en}</span></div>`
+         ).join('')}
+       </div>`
+    : '';
+
+  stage.innerHTML = `
+    <div class="done">
+      <div class="done-num">${sessionCorrect}/${session.length}</div>
+      <div class="done-label">${activeDeck.name} · complete</div>
+      ${reviewHtml}
+      <div class="done-actions">
+        <button class="btn-primary" id="again">Another round</button>
+        <button class="btn-secondary" id="back">Pick deck</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('again').onclick = () => startSession(activeDeck);
+  document.getElementById('back').onclick = renderPicker;
+}
+
+// boot
+renderPicker();
+</script>
+</body>
+</html>

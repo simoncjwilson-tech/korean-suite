@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Korean Suite</title>
+  <link rel="stylesheet" href="shared/styles.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 32px 16px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .subtitle { color: #777; font-size: 14px; margin-bottom: 32px; }
+    .grid { display: grid; gap: 12px; width: 100%; max-width: 380px; }
+    .card {
+      display: block;
+      padding: 18px 20px;
+      background: white;
+      border: 1px solid #e2e2e2;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #1a1a1a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .card:hover { border-color: #c2c2c2; }
+    .card h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+    .card p { margin: 0; color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>한국어 Suite</h1>
+  <p class="subtitle">Simon's Korean learning apps</p>
+  <div class="grid">
+    <a class="card" href="flashcards/">
+      <h2>Flashcards</h2>
+      <p>Vocabulary reference — flip cards, bilingual, multi-deck</p>
+    </a>
+    <a class="card" href="drill/">
+      <h2>Daily Drill</h2>
+      <p>Fast repetition</p>
+    </a>
+    <a class="card" href="seoul/">
+      <h2>Seoul Situations</h2>
+      <p>Conversational phrases for daily life</p>
+    </a>
+    <a class="card" href="listening/">
+      <h2>Listening Match</h2>
+      <p>Listening comprehension</p>
+    </a>
+  </div>
+</body>
+</html>

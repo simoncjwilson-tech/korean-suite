@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국어 Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&family=Noto+Sans+KR:wght@300;400&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --ink: #1a1410; --paper: #f5f0e8; --aged: #e8dfc8; --rust: #b5451b; --gold: #c8973a; --muted: #8a7f6e; --light-ink: #3d3228; }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Serif Display', serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; position: relative; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(0,0,0,0.015) 28px, rgba(0,0,0,0.015) 29px), repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(0,0,0,0.008) 28px, rgba(0,0,0,0.008) 29px); pointer-events: none; }
+  header { text-align: center; margin-bottom: 24px; }
+  .title-ko { font-family: 'Noto Serif KR', serif; font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+  .title-en { font-family: 'DM Serif Display', serif; font-style: italic; font-size: clamp(0.9rem, 2vw, 1.1rem); color: var(--muted); margin-top: 6px; letter-spacing: 0.08em; }
+  .divider { width: 80px; height: 2px; background: linear-gradient(90deg, transparent, var(--rust), transparent); margin: 16px auto; }
+  .direction-row { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em; }
+  .direction-row span { color: var(--muted); }
+  .toggle-wrap { display: flex; border: 1.5px solid var(--ink); border-radius: 2px; overflow: hidden; }
+  .toggle-btn { padding: 6px 14px; background: transparent; color: var(--muted); border: none; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.15s; }
+  .toggle-btn:first-child { border-right: 1.5px solid var(--ink); }
+  .toggle-btn.active { background: var(--ink); color: var(--paper); }
+  .categories { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+  .cat-btn { font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 16px; border: 1.5px solid var(--muted); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; border-radius: 2px; }
+  .cat-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .cat-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .card-area { width: 100%; max-width: 520px; margin-bottom: 16px; position: relative; }
+  .swipe-label { position: absolute; top: 50%; transform: translateY(-50%); font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; pointer-events: none; z-index: 10; }
+  .swipe-label.left { left: 12px; color: var(--rust); }
+  .swipe-label.right { right: 12px; color: #4a7c59; }
+  .card-scene { width: 100%; perspective: 1200px; }
+  .card-inner { position: relative; width: 100%; height: 320px; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1); cursor: pointer; user-select: none; }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 2px solid var(--ink); background: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; border-radius: 4px; box-shadow: 6px 6px 0 var(--aged), 12px 12px 0 rgba(0,0,0,0.06); }
+  .card-face.back { transform: rotateY(180deg); background: var(--aged); }
+  .card-face::before, .card-face::after { content: '◆'; position: absolute; font-size: 0.5rem; color: var(--gold); opacity: 0.6; }
+  .card-face::before { top: 12px; left: 16px; }
+  .card-face::after { bottom: 12px; right: 16px; }
+  .card-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); position: absolute; top: 16px; }
+  .card-hangul { font-family: 'Noto Serif KR', serif; font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 700; line-height: 1.2; color: var(--ink); text-align: center; }
+  .card-roman { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: var(--rust); margin-top: 12px; letter-spacing: 0.05em; text-align: center; }
+  .card-english { font-family: 'DM Serif Display', serif; font-size: clamp(1.4rem, 4vw, 2rem); color: var(--ink); text-align: center; line-height: 1.3; }
+  .card-example { font-family: 'Noto Sans KR', sans-serif; font-size: 0.82rem; font-weight: 300; color: var(--light-ink); margin-top: 16px; text-align: center; line-height: 1.6; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px; width: 100%; }
+  .card-example .ex-ko { font-size: 0.9rem; font-weight: 400; }
+  .hint { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-align: center; margin-bottom: 24px; opacity: 0.7; }
+  .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 32px; }
+  .btn { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 24px; border: 2px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; transition: all 0.15s; border-radius: 2px; }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover { background: var(--rust); border-color: var(--rust); }
+  .btn.correct { border-color: #4a7c59; color: #4a7c59; }
+  .btn.correct:hover { background: #4a7c59; color: var(--paper); }
+  .btn.wrong { border-color: var(--rust); color: var(--rust); }
+  .btn.wrong:hover { background: var(--rust); color: var(--paper); }
+  .progress-bar { width: 100%; max-width: 520px; height: 3px; background: var(--aged); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--rust), var(--gold)); transition: width 0.4s ease; border-radius: 2px; }
+  .stats { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; display: flex; gap: 24px; margin-bottom: 40px; }
+  .stats span { color: var(--ink); }
+  .score-panel { display: none; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 40px; border: 2px solid var(--ink); max-width: 520px; width: 100%; background: var(--aged); box-shadow: 8px 8px 0 rgba(0,0,0,0.08); }
+  .score-panel.visible { display: flex; }
+  .score-big { font-family: 'Noto Serif KR', serif; font-size: 4rem; font-weight: 700; color: var(--rust); }
+  .score-label { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.3rem; color: var(--muted); }
+  .card-counter { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title-ko">한국어 카드</div>
+  <div class="title-en">Korean Flashcards</div>
+  <div class="divider"></div>
+</header>
+<div class="direction-row">
+  <span>Show first:</span>
+  <div class="toggle-wrap">
+    <button class="toggle-btn active" id="btnKoFirst" onclick="setDirection('ko')">🇰🇷 Korean</button>
+    <button class="toggle-btn" id="btnEnFirst" onclick="setDirection('en')">🇬🇧 English</button>
+  </div>
+</div>
+<div class="categories" id="categories"></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="stats">
+  <div>Card <span id="cardNum">1</span> / <span id="cardTotal">1</span></div>
+  <div>✓ <span id="correctCount">0</span></div>
+  <div>✗ <span id="wrongCount">0</span></div>
+</div>
+<div class="card-area" id="cardArea">
+  <div class="swipe-label left" id="swipeLabelLeft">✗ Again</div>
+  <div class="swipe-label right" id="swipeLabelRight">✓ Got it</div>
+  <div class="card-scene">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face front">
+        <div class="card-label" id="frontLabel">Korean</div>
+        <div id="frontContent"></div>
+      </div>
+      <div class="card-face back">
+        <div class="card-label" id="backLabel">English</div>
+        <div id="backContent"></div>
+        <div class="card-example" id="backExample"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hint" id="hintText">tap to reveal · swipe right ✓ · swipe left ✗</div>
+<div class="controls" id="controls">
+  <button class="btn wrong" onclick="markWrong()">✗ Again</button>
+  <button class="btn primary" onclick="flipCard()">Flip</button>
+  <button class="btn correct" onclick="markCorrect()">✓ Got it</button>
+</div>
+<div class="score-panel" id="scorePanel">
+  <div class="score-big" id="scoreBig">—</div>
+  <div class="score-label">Well done, 잘했어요!</div>
+  <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);letter-spacing:0.08em" id="scoreDetail"></div>
+  <button class="btn primary" onclick="restart()" style="margin-top:8px">Restart deck</button>
+</div>
+<script src="../shared/logger.js"></script>
+<script>
+const decks = {
+  greetings: { label: "인사 Greetings", cards: [
+    { ko: "안녕하세요", rom: "annyeonghaseyo", en: "Hello / Good day", ex: { ko: "안녕하세요! 처음 뵙겠습니다.", en: "Hello! Nice to meet you." } },
+    { ko: "감사합니다", rom: "gamsahamnida", en: "Thank you (formal)", ex: { ko: "도와주셔서 감사합니다.", en: "Thank you for your help." } },
+    { ko: "죄송합니다", rom: "joesonghamnida", en: "I'm sorry (formal)", ex: { ko: "늦어서 죄송합니다.", en: "I'm sorry for being late." } },
+    { ko: "괜찮아요", rom: "gwaenchanayo", en: "It's okay / I'm fine", ex: { ko: "괜찮아요, 걱정 마세요.", en: "It's okay, don't worry." } },
+    { ko: "안녕히 가세요", rom: "annyeonghi gaseyo", en: "Goodbye (to one leaving)", ex: { ko: "내일 봐요. 안녕히 가세요!", en: "See you tomorrow. Goodbye!" } },
+    { ko: "어떻게 지내세요?", rom: "eotteoke jinaeseyo?", en: "How are you?", ex: { ko: "요즘 어떻게 지내세요?", en: "How have you been lately?" } },
+    { ko: "잘 지내요", rom: "jal jinaeyo", en: "I'm doing well", ex: { ko: "네, 잘 지내요. 감사해요.", en: "Yes, I'm doing well, thanks." } },
+    { ko: "반갑습니다", rom: "bangapseumnida", en: "Nice to meet you", ex: { ko: "처음 뵙겠습니다. 반갑습니다!", en: "Nice to meet you!" } },
+  ]},
+  numbers: { label: "숫자 Numbers", cards: [
+    { ko: "일", rom: "il", en: "One (Sino-Korean)", ex: { ko: "일 층에 있어요.", en: "It's on the first floor." } },
+    { ko: "이", rom: "i", en: "Two (Sino-Korean)", ex: { ko: "이 명이에요.", en: "There are two people." } },
+    { ko: "삼", rom: "sam", en: "Three (Sino-Korean)", ex: { ko: "삼 분만 기다려 주세요.", en: "Please wait just three minutes." } },
+    { ko: "사", rom: "sa", en: "Four (Sino-Korean)", ex: { ko: "사 번 버스예요.", en: "It's bus number four." } },
+    { ko: "오", rom: "o", en: "Five (Sino-Korean)", ex: { ko: "오 천 원이에요.", en: "It's 5,000 won." } },
+    { ko: "하나", rom: "hana", en: "One (Native Korean)", ex: { ko: "하나 주세요.", en: "Please give me one." } },
+    { ko: "둘", rom: "dul", en: "Two (Native Korean)", ex: { ko: "둘 다 맛있어요.", en: "Both are delicious." } },
+    { ko: "셋", rom: "set", en: "Three (Native Korean)", ex: { ko: "셋을 샀어요.", en: "I bought three." } },
+    { ko: "백", rom: "baek", en: "One hundred", ex: { ko: "백 원짜리예요.", en: "It's a 100-won coin." } },
+    { ko: "천", rom: "cheon", en: "One thousand", ex: { ko: "천 원이에요.", en: "It's 1,000 won." } },
+  ]},
+  food: { label: "음식 Food", cards: [
+    { ko: "밥", rom: "bap", en: "Rice / Meal", ex: { ko: "밥 먹었어요?", en: "Have you eaten?" } },
+    { ko: "물", rom: "mul", en: "Water", ex: { ko: "물 한 잔 주세요.", en: "Please give me a glass of water." } },
+    { ko: "맛있어요", rom: "massisseoyo", en: "It's delicious", ex: { ko: "이 김치 정말 맛있어요!", en: "This kimchi is really delicious!" } },
+    { ko: "김치", rom: "kimchi", en: "Kimchi", ex: { ko: "김치를 좋아해요.", en: "I like kimchi." } },
+    { ko: "커피", rom: "keopi", en: "Coffee", ex: { ko: "커피 한 잔 마실게요.", en: "I'll have a cup of coffee." } },
+    { ko: "맥주", rom: "maekju", en: "Beer", ex: { ko: "맥주 두 잔 주세요.", en: "Two beers please." } },
+    { ko: "불고기", rom: "bulgogi", en: "Bulgogi (grilled beef)", ex: { ko: "불고기 먹으러 갈까요?", en: "Shall we go eat bulgogi?" } },
+    { ko: "맵다", rom: "maepda", en: "Spicy", ex: { ko: "이거 너무 매워요!", en: "This is too spicy!" } },
+    { ko: "소고기", rom: "sogogi", en: "Beef", ex: { ko: "소고기를 좋아해요.", en: "I like beef." } },
+  ]},
+  places: { label: "여행 Travel", cards: [
+    { ko: "여행하다", rom: "yeohaenghada", en: "To travel", ex: { ko: "한국을 여행해요.", en: "I travel around Korea." } },
+    { ko: "휴가", rom: "hyuga", en: "Vacation", ex: { ko: "휴가 중이에요.", en: "I'm on vacation." } },
+    { ko: "집에서", rom: "jibeseo", en: "At home", ex: { ko: "집에서 쉬어요.", en: "I rest at home." } },
+    { ko: "고속도로", rom: "gosokdoro", en: "Highway", ex: { ko: "고속도로로 가요.", en: "I go by highway." } },
+    { ko: "공항", rom: "gonghang", en: "Airport", ex: { ko: "공항에 가야 해요.", en: "I need to go to the airport." } },
+    { ko: "병원", rom: "byeongwon", en: "Hospital", ex: { ko: "병원에 가야 해요.", en: "I need to go to the hospital." } },
+    { ko: "은행", rom: "eunhaeng", en: "Bank", ex: { ko: "은행에 가요.", en: "I'm going to the bank." } },
+    { ko: "약국", rom: "yakguk", en: "Pharmacy", ex: { ko: "약국이 어디에요?", en: "Where is the pharmacy?" } },
+    { ko: "다니다", rom: "danida", en: "To commute / go back and forth", ex: { ko: "매일 학교에 다녀요.", en: "I go to school every day." } },
+    { ko: "우체국", rom: "ucheguk", en: "Post office", ex: { ko: "우체국에서 소포를 보내요.", en: "I send a parcel at the post office." } },
+    { ko: "시내", rom: "sinae", en: "Downtown", ex: { ko: "시내에서 쇼핑해요.", en: "I shop downtown." } },
+    { ko: "관광 여행", rom: "gwangwang yeohaeng", en: "Tourism / sightseeing", ex: { ko: "관광 여행을 좋아해요.", en: "I like sightseeing." } },
+    { ko: "서점", rom: "seojeom", en: "Bookstore", ex: { ko: "서점에서 책을 사요.", en: "I buy books at the bookstore." } },
+    { ko: "지하철", rom: "jihacheol", en: "Subway", ex: { ko: "지하철을 타요.", en: "I take the subway." } },
+    { ko: "공항철도", rom: "gonghang cheoldo", en: "Airport rail line", ex: { ko: "공항철도로 인천공항에 가요.", en: "I go to Incheon Airport by airport rail." } },
+    { ko: "역", rom: "yeok", en: "Station", ex: { ko: "역에서 만나요.", en: "Let's meet at the station." } },
+  ]},
+  essentials: { label: "기본 Essentials", cards: [
+    { ko: "네", rom: "ne", en: "Yes", ex: { ko: "네, 맞아요.", en: "Yes, that's right." } },
+    { ko: "아니요", rom: "aniyo", en: "No", ex: { ko: "아니요, 괜찮아요.", en: "No, it's okay." } },
+    { ko: "얼마예요?", rom: "eolmayeyo?", en: "How much is it?", ex: { ko: "이거 얼마예요?", en: "How much is this?" } },
+    { ko: "모르겠어요", rom: "moreugesseoyo", en: "I don't know", ex: { ko: "죄송해요, 모르겠어요.", en: "Sorry, I don't know." } },
+    { ko: "천천히", rom: "cheoncheonhi", en: "Slowly", ex: { ko: "천천히 말해 주세요.", en: "Please speak slowly." } },
+    { ko: "다시", rom: "dasi", en: "Again", ex: { ko: "다시 한번 말해 주세요.", en: "Please say it one more time." } },
+    { ko: "화장실", rom: "hwajangsil", en: "Toilet / Bathroom", ex: { ko: "화장실이 어디에요?", en: "Where is the bathroom?" } },
+  ]},
+  verbs: { label: "동사 Verbs", cards: [
+    { ko: "가다", rom: "gada", en: "To go", ex: { ko: "학교에 가요.", en: "I go to school." } },
+    { ko: "오다", rom: "oda", en: "To come", ex: { ko: "집에 와요.", en: "Come home." } },
+    { ko: "앉다", rom: "anda", en: "To sit", ex: { ko: "여기 앉아요.", en: "Sit here." } },
+    { ko: "쉬다", rom: "swida", en: "To rest", ex: { ko: "좀 쉬어요.", en: "Rest a little." } },
+    { ko: "자다", rom: "jada", en: "To sleep", ex: { ko: "일찍 자요.", en: "I sleep early." } },
+    { ko: "일어나다", rom: "ireonada", en: "To wake up", ex: { ko: "아침에 일어나요.", en: "I wake up in the morning." } },
+    { ko: "세수하다", rom: "sesu hada", en: "To wash one's face", ex: { ko: "아침에 세수해요.", en: "I wash my face in the morning." } },
+    { ko: "이를 닦다", rom: "ireul dakda", en: "To brush teeth", ex: { ko: "밥 먹고 이를 닦아요.", en: "I brush my teeth after eating." } },
+    { ko: "서다", rom: "seoda", en: "To stand", ex: { ko: "여기 서요.", en: "Stand here." } },
+    { ko: "기다리다", rom: "gidarida", en: "To wait", ex: { ko: "조금만 기다려요.", en: "Wait just a moment." } },
+    { ko: "시작하다", rom: "sijakhada", en: "To start", ex: { ko: "수업을 시작해요.", en: "The class starts." } },
+    { ko: "끝나다", rom: "kkeunnada", en: "To end / finish", ex: { ko: "수업이 끝나요.", en: "The class ends." } },
+    { ko: "걷다", rom: "geotda", en: "To walk", ex: { ko: "공원에서 걸어요.", en: "I walk in the park." } },
+    { ko: "달리다", rom: "dallida", en: "To run", ex: { ko: "매일 달려요.", en: "I run every day." } },
+    { ko: "빠르다", rom: "ppareuda", en: "To be fast", ex: { ko: "저 차는 빨라요.", en: "That car is fast." } },
+    { ko: "말하다", rom: "malhada", en: "To talk / speak", ex: { ko: "천천히 말해요.", en: "Speak slowly." } },
+    { ko: "웃다", rom: "utda", en: "To laugh / smile", ex: { ko: "왜 웃어요?", en: "Why are you laughing?" } },
+    { ko: "마시다", rom: "masida", en: "To drink", ex: { ko: "물을 마셔요.", en: "I drink water." } },
+    { ko: "먹다", rom: "meokda", en: "To eat", ex: { ko: "밥을 먹어요.", en: "I eat rice." } },
+    { ko: "읽다", rom: "ikda", en: "To read", ex: { ko: "책을 읽어요.", en: "I read a book." } },
+    { ko: "쓰다", rom: "sseuda", en: "To write", ex: { ko: "편지를 써요.", en: "I write a letter." } },
+    { ko: "듣다", rom: "deutda", en: "To listen", ex: { ko: "음악을 들어요.", en: "I listen to music." } },
+    { ko: "운동하다", rom: "undong hada", en: "To exercise", ex: { ko: "매일 운동해요.", en: "I exercise every day." } },
+    { ko: "수영하다", rom: "suyeong hada", en: "To swim", ex: { ko: "바다에서 수영해요.", en: "I swim in the sea." } },
+    { ko: "넘어지다", rom: "neomeojida", en: "To fall down", ex: { ko: "길에서 넘어졌어요.", en: "I fell down on the street." } },
+    { ko: "노래하다", rom: "norae hada", en: "To sing", ex: { ko: "노래방에서 노래해요.", en: "I sing at the noraebang." } },
+    { ko: "춤추다", rom: "chumchuda", en: "To dance", ex: { ko: "음악에 맞춰 춤춰요.", en: "I dance to the music." } },
+    { ko: "던지다", rom: "deonjida", en: "To throw", ex: { ko: "공을 던져요.", en: "I throw the ball." } },
+    { ko: "잡다", rom: "japda", en: "To catch / grab", ex: { ko: "공을 잡아요.", en: "I catch the ball." } },
+    { ko: "주다", rom: "juda", en: "To give", ex: { ko: "선물을 줘요.", en: "I give a gift." } },
+    { ko: "만나다", rom: "mannada", en: "To meet", ex: { ko: "친구를 만나요.", en: "I meet a friend." } },
+    { ko: "차다", rom: "chada", en: "To kick", ex: { ko: "공을 차요.", en: "I kick the ball." } },
+    { ko: "보다", rom: "boda", en: "To watch / see", ex: { ko: "영화를 봐요.", en: "I watch a movie." } },
+    { ko: "배우다", rom: "baeuda", en: "To learn", ex: { ko: "한국어를 배워요.", en: "I learn Korean." } },
+    { ko: "공부하다", rom: "gongbu hada", en: "To study", ex: { ko: "카페에서 공부해요.", en: "I study at the café." } },
+    { ko: "바쁘다", rom: "bappeuda", en: "To be busy", ex: { ko: "요즘 너무 바빠요.", en: "I'm very busy these days." } },
+    { ko: "일하다", rom: "ilhada", en: "To work", ex: { ko: "회사에서 일해요.", en: "I work at the office." } },
+  ]},
+  transport: { label: "교통 Transport", cards: [
+    { ko: "자동차", rom: "jadongcha", en: "Car", ex: { ko: "자동차로 가요.", en: "I go by car." } },
+    { ko: "주차장", rom: "juchajang", en: "Car park", ex: { ko: "주차장이 어디에요?", en: "Where is the car park?" } },
+    { ko: "지하철", rom: "jihacheol", en: "Subway", ex: { ko: "지하철을 타요.", en: "I take the subway." } },
+    { ko: "타다", rom: "tada", en: "To ride / take", ex: { ko: "버스를 타요.", en: "I take the bus." } },
+    { ko: "역", rom: "yeok", en: "Station", ex: { ko: "역에서 만나요.", en: "Let's meet at the station." } },
+    { ko: "비행기", rom: "bihaenggi", en: "Airplane", ex: { ko: "비행기를 타요.", en: "I take the airplane." } },
+    { ko: "공항", rom: "gonghang", en: "Airport", ex: { ko: "공항에 가야 해요.", en: "I need to go to the airport." } },
+    { ko: "자전거", rom: "jajeongeo", en: "Bicycle", ex: { ko: "자전거를 타요.", en: "I ride a bicycle." } },
+    { ko: "출근하다", rom: "chulgeunhada", en: "To go to work", ex: { ko: "매일 9시에 출근해요.", en: "I go to work at 9 every day." } },
+    { ko: "퇴근하다", rom: "toegeunhada", en: "To finish work / leave work", ex: { ko: "6시에 퇴근해요.", en: "I finish work at 6." } },
+    { ko: "지하철로 출근해요", rom: "jihacheolro chulgeunhaeyo", en: "I commute to work by subway", ex: { ko: "저는 매일 지하철로 출근해요.", en: "I commute to work by subway every day." } },
+  ]},
+};
+
+let currentDeck = 'greetings', currentCards = [], currentIndex = 0;
+let isFlipped = false, correct = 0, wrong = 0;
+let direction = 'ko';
+
+function setDirection(dir) {
+  direction = dir;
+  document.getElementById('btnKoFirst').classList.toggle('active', dir === 'ko');
+  document.getElementById('btnEnFirst').classList.toggle('active', dir === 'en');
+  showCard();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadDeck(key) {
+  currentDeck = key; currentCards = shuffle(decks[key].cards);
+  currentIndex = 0; correct = 0; wrong = 0; isFlipped = false;
+  const ci = document.getElementById('cardInner');
+  ci.style.transition = 'none'; ci.style.transform = ''; ci.style.opacity = '1';
+  ci.classList.remove('flipped');
+  setTimeout(() => { ci.style.transition = ''; }, 50);
+  document.getElementById('scorePanel').classList.remove('visible');
+  document.getElementById('cardArea').style.display = '';
+  document.getElementById('controls').style.display = '';
+  document.getElementById('hintText').style.display = '';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.deck === key));
+  showCard();
+}
+
+function renderKorean(card, container) {
+  container.innerHTML = '';
+  const h = document.createElement('div'); h.className = 'card-hangul'; h.textContent = card.ko;
+  const r = document.createElement('div'); r.className = 'card-roman'; r.textContent = card.rom;
+  const ctr = document.createElement('div'); ctr.className = 'card-counter';
+  ctr.textContent = `${currentIndex + 1} / ${currentCards.length}`;
+  container.appendChild(h); container.appendChild(r); container.appendChild(ctr);
+}
+
+function renderEnglish(card, container) {
+  container.innerHTML = '';
+  const e = document.createElement('div'); e.className = 'card-english'; e.textContent = card.en;
+  const ctr = document.createElement('div'); ctr.className = 'card-counter';
+  ctr.textContent = `${currentIndex + 1} / ${currentCards.length}`;
+  container.appendChild(e); container.appendChild(ctr);
+}
+
+function showCard() {
+  const card = currentCards[currentIndex];
+  isFlipped = false;
+  const ci = document.getElementById('cardInner');
+  ci.style.transition = 'none'; ci.style.transform = ''; ci.style.opacity = '1';
+  ci.classList.remove('flipped');
+  setTimeout(() => { ci.style.transition = ''; }, 50);
+
+  const frontContent = document.getElementById('frontContent');
+  const backContent = document.getElementById('backContent');
+
+  if (direction === 'ko') {
+    document.getElementById('frontLabel').textContent = 'Korean';
+    document.getElementById('backLabel').textContent = 'English';
+    renderKorean(card, frontContent);
+    renderEnglish(card, backContent);
+  } else {
+    document.getElementById('frontLabel').textContent = 'English';
+    document.getElementById('backLabel').textContent = 'Korean';
+    renderEnglish(card, frontContent);
+    renderKorean(card, backContent);
+  }
+
+  document.getElementById('backExample').innerHTML = card.ex
+    ? `<span class="ex-ko">${card.ex.ko}</span><br><em>${card.ex.en}</em>` : '';
+  document.getElementById('cardNum').textContent = currentIndex + 1;
+  document.getElementById('cardTotal').textContent = currentCards.length;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('progressFill').style.width = (currentIndex / currentCards.length * 100) + '%';
+  document.getElementById('hintText').textContent = 'tap to reveal · swipe right ✓ · swipe left ✗';
+  document.getElementById('swipeLabelLeft').style.opacity = 0;
+  document.getElementById('swipeLabelRight').style.opacity = 0;
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('cardInner').classList.toggle('flipped', isFlipped);
+}
+
+function markCorrect() { correct++; animateOut(1); }
+function markWrong() { wrong++; animateOut(-1); }
+
+function animateOut(dir) {
+  const ci = document.getElementById('cardInner');
+  ci.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+  ci.style.transform = `translateX(${dir * 450}px) rotate(${dir * 15}deg)`;
+  ci.style.opacity = '0';
+  setTimeout(() => { currentIndex++; if (currentIndex >= currentCards.length) showScore(); else showCard(); }, 300);
+}
+
+function showScore() {
+  try { KoreanSuiteLogger.log('flashcards', { deckId: currentDeck, events: [{ type: 'session_complete', correct: correct, wrong: wrong, total: currentCards.length, direction: direction }] }); } catch(e){}
+  const pct = Math.round((correct / currentCards.length) * 100);
+  document.getElementById('scoreBig').textContent = pct + '%';
+  document.getElementById('scoreDetail').textContent = `${correct} correct · ${wrong} incorrect · ${currentCards.length} total`;
+  document.getElementById('scorePanel').classList.add('visible');
+  document.getElementById('cardArea').style.display = 'none';
+  document.getElementById('controls').style.display = 'none';
+  document.getElementById('hintText').style.display = 'none';
+  document.getElementById('progressFill').style.width = '100%';
+}
+
+function restart() { loadDeck(currentDeck); }
+
+const cardArea = document.getElementById('cardArea');
+const labelL = document.getElementById('swipeLabelLeft');
+const labelR = document.getElementById('swipeLabelRight');
+const SWIPE_THRESHOLD = 80;
+let startX = 0, dragX = 0, dragging = false, didSwipe = false;
+
+function onMove(x) {
+  dragX = x - startX;
+  const ci = document.getElementById('cardInner');
+  ci.style.transition = 'none';
+  const rot = dragX * 0.06;
+  ci.style.transform = isFlipped ? `rotateY(180deg) translateX(${-dragX}px) rotate(${-rot}deg)` : `translateX(${dragX}px) rotate(${rot}deg)`;
+  const ratio = Math.min(Math.abs(dragX) / SWIPE_THRESHOLD, 1);
+  labelL.style.opacity = dragX < 0 ? ratio : 0;
+  labelR.style.opacity = dragX > 0 ? ratio : 0;
+  if (Math.abs(dragX) > 10) didSwipe = true;
+}
+
+function onEnd() {
+  if (!dragging) return;
+  dragging = false;
+  if (!didSwipe) {
+    resetCard(); flipCard();
+  } else if (Math.abs(dragX) >= SWIPE_THRESHOLD) {
+    const dir = dragX > 0 ? 1 : -1;
+    const ci = document.getElementById('cardInner');
+    ci.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+    ci.style.transform = `translateX(${dir * 500}px) rotate(${dir * 20}deg)`;
+    ci.style.opacity = '0';
+    labelL.style.opacity = 0; labelR.style.opacity = 0;
+    setTimeout(() => { currentIndex++; if (dir > 0) correct++; else wrong++; if (currentIndex >= currentCards.length) showScore(); else showCard(); }, 260);
+  } else { resetCard(); }
+}
+
+function resetCard() {
+  const ci = document.getElementById('cardInner');
+  ci.style.transition = 'transform 0.3s ease';
+  ci.style.transform = isFlipped ? 'rotateY(180deg)' : '';
+  labelL.style.opacity = 0; labelR.style.opacity = 0;
+}
+
+cardArea.addEventListener('touchstart', e => { startX = e.touches[0].clientX; dragX = 0; dragging = true; didSwipe = false; }, { passive: true });
+cardArea.addEventListener('touchmove', e => { if (dragging) onMove(e.touches[0].clientX); }, { passive: true });
+cardArea.addEventListener('touchend', onEnd);
+cardArea.addEventListener('mousedown', e => { startX = e.clientX; dragX = 0; dragging = true; didSwipe = false; });
+window.addEventListener('mousemove', e => { if (dragging) onMove(e.clientX); });
+window.addEventListener('mouseup', onEnd);
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight' || e.key === '1') markCorrect();
+  if (e.key === 'ArrowLeft'  || e.key === '2') markWrong();
+});
+
+const catContainer = document.getElementById('categories');
+Object.entries(decks).forEach(([key, deck]) => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn' + (key === currentDeck ? ' active' : '');
+  btn.dataset.deck = key; btn.textContent = deck.label;
+  btn.onclick = () => loadDeck(key);
+  catContainer.appendChild(btn);
+});
+
+loadDeck('greetings');
+</script>
+</body>
+</html>

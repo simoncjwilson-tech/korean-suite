@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Listening Match</title>
+<style>
+  :root {
+    --bg: #ebf0ee;
+    --ink: #1a2520;
+    --muted: #6f7a73;
+    --accent: #2a6f5a;
+    --correct: #2a6f5a;
+    --wrong: #b04848;
+    --soft: #d4dbd6;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'Charter', 'Iowan Old Style', Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--soft);
+    margin-bottom: 32px;
+  }
+  .title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .progress {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; }
+
+  .card-num {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .audio-card {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 6px;
+    padding: 36px 24px;
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .play-btn {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: transform 0.15s ease, background 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .play-btn:active { transform: scale(0.95); }
+  .play-btn.playing { background: var(--ink); }
+  .play-btn svg { width: 36px; height: 36px; fill: #fff; }
+  .play-hint {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .reveal {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--bg);
+    border-radius: 4px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 22px;
+    color: var(--ink);
+    display: none;
+  }
+  .reveal.show { display: block; }
+  .reveal-toggle {
+    margin-top: 12px;
+    background: none;
+    border: 1px solid var(--soft);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .question {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-family: inherit;
+    font-size: 17px;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    line-height: 1.3;
+  }
+  .opt:active { transform: scale(0.99); }
+  .opt.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
+  .opt.wrong { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+  .opt.dim { opacity: 0.4; }
+  .opt:disabled { cursor: default; }
+  .next-bar { margin-top: 24px; text-align: center; min-height: 48px; }
+  .next-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 30px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .next-btn.show { opacity: 1; }
+
+  .warning {
+    background: #fef0e0;
+    border: 1px solid #d4a574;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #6b4a20;
+    margin-bottom: 20px;
+  }
+
+  .done { text-align: center; padding: 40px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .done-num {
+    font-size: 64px;
+    font-weight: 300;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+  .done-label {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .totals {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 32px;
+    padding: 20px 0;
+    border-top: 1px solid var(--soft);
+    border-bottom: 1px solid var(--soft);
+  }
+  .totals div { text-align: center; }
+  .totals .num { font-size: 22px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .totals .lbl { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .restart {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 36px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .loading { text-align: center; padding: 80px 20px; color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">Listening Match</div>
+    <div class="progress" id="progress">— / 6</div>
+  </header>
+  <div class="stage" id="stage">
+    <div class="loading">Loading…</div>
+  </div>
+</div>
+
+<script src="../shared/logger.js"></script>
+<script>
+// ============================================================
+// LISTENING POOL
+// Each item: korean sentence (audio target), english correct, 3 distractors
+// Sentences kept short (3-7 words) for A2-B1
+// ============================================================
+const POOL = [
+  { ko: '저는 학생이에요.', en: 'I am a student.', distractors: ['I am a teacher.', 'I am a doctor.', 'I am a friend.'] },
+  { ko: '커피 한 잔 주세요.', en: 'One coffee please.', distractors: ['Two coffees please.', 'Where is the coffee?', 'Coffee is expensive.'] },
+  { ko: '오늘 날씨가 좋아요.', en: 'The weather is nice today.', distractors: ['It rains today.', 'Yesterday was nice.', 'Tomorrow is hot.'] },
+  { ko: '집에 가요.', en: 'I\'m going home.', distractors: ['I\'m at home.', 'Come to my home.', 'Home is far.'] },
+  { ko: '이거 얼마예요?', en: 'How much is this?', distractors: ['What is this?', 'Where is this?', 'Is this good?'] },
+  { ko: '한국어를 공부해요.', en: 'I study Korean.', distractors: ['I speak Korean.', 'I like Korean food.', 'Korean is hard.'] },
+  { ko: '친구를 만나요.', en: 'I\'m meeting a friend.', distractors: ['I have a friend.', 'My friend is nice.', 'Where is my friend?'] },
+  { ko: '점심 먹었어요?', en: 'Did you eat lunch?', distractors: ['Eat lunch.', 'I\'m eating lunch.', 'Lunch is good.'] },
+  { ko: '지하철로 가요.', en: 'I go by subway.', distractors: ['I go to the subway.', 'The subway is here.', 'Where is the subway?'] },
+  { ko: '내일 봐요.', en: 'See you tomorrow.', distractors: ['I saw it yesterday.', 'I\'ll come tomorrow.', 'Tomorrow is busy.'] },
+  { ko: '이름이 뭐예요?', en: 'What is your name?', distractors: ['What is this?', 'Where are you?', 'Who is it?'] },
+  { ko: '저는 영국 사람이에요.', en: 'I\'m British.', distractors: ['I\'m American.', 'I\'m Korean.', 'I\'m a foreigner.'] },
+  { ko: '물 좀 주세요.', en: 'Some water please.', distractors: ['Where is the water?', 'I drank water.', 'Water is cold.'] },
+  { ko: '시간 있어요?', en: 'Do you have time?', distractors: ['What time is it?', 'I have no time.', 'It\'s on time.'] },
+  { ko: '잘 먹겠습니다.', en: 'I will eat well. (said before a meal)', distractors: ['It was delicious.', 'I\'m hungry.', 'I don\'t want to eat.'] },
+  { ko: '잘 모르겠어요.', en: 'I don\'t really know.', distractors: ['I know well.', 'I forgot.', 'I understand.'] },
+  { ko: '천천히 말해 주세요.', en: 'Please speak slowly.', distractors: ['Please speak louder.', 'I speak fast.', 'Don\'t speak.'] },
+  { ko: '한국 음식 좋아해요.', en: 'I like Korean food.', distractors: ['I eat Korean food.', 'Korean food is spicy.', 'I cook Korean food.'] },
+];
+
+const SESSION_SIZE = 6;
+
+let session = [];
+let currentIdx = 0;
+let sessionCorrect = 0;
+let koreanVoice = null;
+let voicesReady = false;
+
+// ============================================================
+// VOICE SETUP
+// ============================================================
+function pickKoreanVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  // Prefer ko-KR; fall back to anything starting with ko
+  koreanVoice = voices.find(v => v.lang === 'ko-KR') ||
+                voices.find(v => v.lang && v.lang.startsWith('ko')) ||
+                null;
+  voicesReady = true;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return false;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  if (koreanVoice) utter.voice = koreanVoice;
+  utter.rate = 0.85;
+  utter.pitch = 1.0;
+  window.speechSynthesis.speak(utter);
+  return true;
+}
+
+// ============================================================
+// SESSION
+// ============================================================
+function shuffle(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildSession() {
+  session = shuffle(POOL).slice(0, SESSION_SIZE).map(item => {
+    const options = shuffle([item.en, ...item.distractors]);
+    return { ...item, options };
+  });
+  currentIdx = 0;
+  sessionCorrect = 0;
+}
+
+const stage = document.getElementById('stage');
+const progress = document.getElementById('progress');
+
+function renderCard() {
+  const card = session[currentIdx];
+  progress.textContent = `${currentIdx + 1} / ${SESSION_SIZE}`;
+
+  const noVoiceWarning = (!koreanVoice && voicesReady)
+    ? `<div class="warning">No Korean voice was found on this device. The text is shown below as a fallback. On iOS, Korean voices come pre-installed; on Android, install a Korean TTS engine in Settings.</div>`
+    : '';
+
+  const fallbackReveal = !koreanVoice
+    ? `<div class="reveal show">${card.ko}</div>`
+    : `<div class="reveal" id="reveal">${card.ko}</div>
+       <button class="reveal-toggle" id="revealToggle">Show text</button>`;
+
+  stage.innerHTML = `
+    <div class="card-num">Listen ${currentIdx + 1}</div>
+    ${noVoiceWarning}
+    <div class="audio-card">
+      <button class="play-btn" id="play" aria-label="Play audio">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="play-hint">Tap to play · tap again to repeat</div>
+      ${fallbackReveal}
+    </div>
+    <div class="question">What does it mean?</div>
+    <div class="options" id="opts"></div>
+    <div class="next-bar"><button class="next-btn" id="next">Next →</button></div>
+  `;
+
+  const playBtn = document.getElementById('play');
+  playBtn.onclick = () => {
+    playBtn.classList.add('playing');
+    speak(card.ko);
+    setTimeout(() => playBtn.classList.remove('playing'), 1500);
+  };
+
+  if (koreanVoice) {
+    const toggle = document.getElementById('revealToggle');
+    const reveal = document.getElementById('reveal');
+    toggle.onclick = () => {
+      reveal.classList.toggle('show');
+      toggle.textContent = reveal.classList.contains('show') ? 'Hide text' : 'Show text';
+    };
+  }
+
+  const optsEl = document.getElementById('opts');
+  card.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(btn, opt, card);
+    optsEl.appendChild(btn);
+  });
+
+  // auto-play first time
+  setTimeout(() => speak(card.ko), 350);
+}
+
+function handleAnswer(btn, chosen, card) {
+  const allBtns = document.querySelectorAll('.opt');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (chosen === card.en) {
+    btn.classList.add('correct');
+    sessionCorrect++;
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach(b => {
+      if (b.textContent === card.en) b.classList.add('correct');
+      else if (b !== btn) b.classList.add('dim');
+    });
+    // also reveal text on a wrong answer
+    const reveal = document.getElementById('reveal');
+    if (reveal) reveal.classList.add('show');
+  }
+
+  document.getElementById('next').classList.add('show');
+  document.getElementById('next').onclick = nextCard;
+}
+
+function nextCard() {
+  currentIdx++;
+  if (currentIdx >= SESSION_SIZE) renderDone();
+  else renderCard();
+}
+
+function renderDone() {
+  try { KoreanSuiteLogger.log('listening', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE }] }); } catch(e){}
+  progress.textContent = `${SESSION_SIZE} / ${SESSION_SIZE}`;
+  stage.innerHTML = `
+    <div class="done">
+      <div class="done-num">${sessionCorrect}/${SESSION_SIZE}</div>
+      <div class="done-label">Session complete</div>
+      <button class="restart" id="restart">Another round</button>
+    </div>
+  `;
+  document.getElementById('restart').onclick = startSession;
+}
+
+function startSession() {
+  buildSession();
+  renderCard();
+}
+
+// boot
+(async () => {
+  // wait for voices to load (some browsers populate them async)
+  if ('speechSynthesis' in window) {
+    pickKoreanVoice();
+    if (!voicesReady || !koreanVoice) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        pickKoreanVoice();
+      };
+      // give it a moment then continue regardless
+      await new Promise(r => setTimeout(r, 250));
+      pickKoreanVoice();
+    }
+  } else {
+    voicesReady = true;
+  }
+  startSession();
+})();
+</script>
+</body>
+</html>

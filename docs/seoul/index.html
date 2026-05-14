@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Seoul Situations</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --ink: #f0ebe0;
+    --muted: #8a8478;
+    --accent: #d4a574;
+    --correct: #7ab07a;
+    --wrong: #c46868;
+    --soft: #1f2530;
+    --card: #161c25;
+    --card-light: #1c232e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    font-family: 'Avenir Next', 'Helvetica Neue', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    background-image:
+      radial-gradient(ellipse at top, rgba(212,165,116,0.06), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(122,176,122,0.04), transparent 60%);
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--soft);
+    margin-bottom: 28px;
+  }
+  .title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .progress {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; }
+
+  .scene-tag {
+    display: inline-block;
+    align-self: flex-start;
+    background: var(--soft);
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .setup {
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .speaker {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  .they-say {
+    background: var(--card);
+    border-left: 2px solid var(--accent);
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 19px;
+    color: var(--ink);
+  }
+  .they-say-en {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+  }
+  .question {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    line-height: 1.3;
+  }
+  .opt:hover:not(:disabled) { background: var(--card-light); border-color: var(--accent); }
+  .opt:active { transform: scale(0.99); }
+  .opt.correct {
+    background: rgba(122,176,122,0.18);
+    border-color: var(--correct);
+  }
+  .opt.wrong {
+    background: rgba(196,104,104,0.18);
+    border-color: var(--wrong);
+  }
+  .opt.dim { opacity: 0.35; }
+  .opt:disabled { cursor: default; }
+  .feedback {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--card);
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .gloss-block {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--soft);
+  }
+  .gloss-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 0;
+  }
+  .gloss-ko {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .gloss-en {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    padding-left: 14px;
+  }
+  .note-row strong { color: var(--accent); }
+  .next-bar { margin-top: 20px; text-align: center; min-height: 48px; }
+  .next-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 30px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .next-btn.show { opacity: 1; }
+  .done {
+    text-align: center;
+    padding: 40px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .done-num {
+    font-size: 64px;
+    font-weight: 200;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+  .done-label {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .totals {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 32px;
+    padding: 20px 0;
+    border-top: 1px solid var(--soft);
+    border-bottom: 1px solid var(--soft);
+  }
+  .totals div { text-align: center; }
+  .totals .num {
+    font-size: 22px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .totals .lbl {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .restart {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 36px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .loading { text-align: center; padding: 80px 20px; color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">Seoul Situations</div>
+    <div class="progress" id="progress">— / 5</div>
+  </header>
+  <div class="stage" id="stage">
+    <div class="loading">Loading…</div>
+  </div>
+</div>
+
+<script src="../shared/logger.js"></script>
+<script>
+// ============================================================
+// SITUATIONS POOL
+// Each item: scene tag, setup (English context), what the other person says (Korean + gloss),
+// 4 response options, correct answer, brief teaching note.
+// ============================================================
+const SITUATIONS = [
+  {
+    tag: 'Cafe · Yeonnam-dong',
+    setup: 'You walk into a cafe and the barista greets you. You want a hot americano.',
+    theySay: { ko: '주문하시겠어요?', en: 'Would you like to order?' },
+    options: [
+      { ko: '따뜻한 아메리카노 한 잔 주세요.', en: 'One hot americano please.', correct: true },
+      { ko: '아메리카노 어디예요?', en: 'Where is the americano?', correct: false },
+      { ko: '아메리카노 안 먹어요.', en: 'I don\'t eat americano.', correct: false },
+      { ko: '아메리카노 비싸요.', en: 'Americano is expensive.', correct: false }
+    ],
+    note: '주세요 = "please give me". The pattern [thing] + 한 잔 + 주세요 means "one cup of [thing], please".'
+  },
+  {
+    tag: 'Convenience store',
+    setup: 'You\'re paying at a GS25. The cashier asks if you have a points card.',
+    theySay: { ko: '포인트 카드 있으세요?', en: 'Do you have a points card?' },
+    options: [
+      { ko: '없어요.', en: 'I don\'t have one.', correct: true },
+      { ko: '여기요.', en: 'Over here.', correct: false },
+      { ko: '많아요.', en: 'There\'s a lot.', correct: false },
+      { ko: '맛있어요.', en: 'It\'s delicious.', correct: false }
+    ],
+    note: '있어요 = "have / there is". 없어요 = "don\'t have / there isn\'t". One of the most useful pairs in Korean.'
+  },
+  {
+    tag: 'Taxi',
+    setup: 'You get in a taxi at Hongik University Station. You want to go to Yeonnam-dong.',
+    theySay: { ko: '어디로 가세요?', en: 'Where are you going?' },
+    options: [
+      { ko: '연남동으로 가 주세요.', en: 'To Yeonnam-dong please.', correct: true },
+      { ko: '연남동에서 와요.', en: 'I\'m coming from Yeonnam-dong.', correct: false },
+      { ko: '연남동이 좋아요.', en: 'Yeonnam-dong is nice.', correct: false },
+      { ko: '연남동 어디예요?', en: 'Where is Yeonnam-dong?', correct: false }
+    ],
+    note: '으로 / 로 = "to / toward" (direction). 가 주세요 = "please go". Together: "please go to [place]".'
+  },
+  {
+    tag: 'Restaurant',
+    setup: 'You\'re at a restaurant in Mapo. The server brings the menu and asks what you\'ll have.',
+    theySay: { ko: '뭐 드시겠어요?', en: 'What will you have?' },
+    options: [
+      { ko: '김치찌개 하나 주세요.', en: 'One kimchi stew please.', correct: true },
+      { ko: '김치찌개 어디예요?', en: 'Where is kimchi stew?', correct: false },
+      { ko: '김치찌개 안 좋아요.', en: 'Kimchi stew is no good.', correct: false },
+      { ko: '김치찌개 많아요.', en: 'There\'s a lot of kimchi stew.', correct: false }
+    ],
+    note: '드시다 = honorific form of 먹다 (to eat). Servers use it about you. You answer with normal verbs about yourself.'
+  },
+  {
+    tag: 'Asking directions',
+    setup: 'You\'re looking for the subway station and stop someone on the street.',
+    theySay: { ko: '네, 무슨 일이세요?', en: 'Yes, what is it?' },
+    options: [
+      { ko: '지하철역이 어디예요?', en: 'Where is the subway station?', correct: true },
+      { ko: '지하철역 주세요.', en: 'Please give me the subway station.', correct: false },
+      { ko: '지하철역 먹어요.', en: 'I eat the subway station.', correct: false },
+      { ko: '지하철역 많아요.', en: 'There are lots of subway stations.', correct: false }
+    ],
+    note: '어디예요? = "Where is it?" The most useful question in a new city. [Thing] + 이/가 + 어디예요?'
+  },
+  {
+    tag: 'Cafe · paying',
+    setup: 'You\'ve finished your coffee and want the bill at the counter.',
+    theySay: { ko: '뭐 도와 드릴까요?', en: 'How can I help you?' },
+    options: [
+      { ko: '계산할게요.', en: 'I\'ll pay.', correct: true },
+      { ko: '계산서 어디예요?', en: 'Where is the receipt?', correct: false },
+      { ko: '커피 주세요.', en: 'Coffee please.', correct: false },
+      { ko: '맛있어요.', en: 'It\'s delicious.', correct: false }
+    ],
+    note: '계산하다 = "to calculate / pay". -ㄹ게요 = "I\'ll do [verb]" — a soft promise or intention.'
+  },
+  {
+    tag: 'Bakery',
+    setup: 'You point at a pastry. The server asks if you want it heated up.',
+    theySay: { ko: '데워 드릴까요?', en: 'Shall I heat it up for you?' },
+    options: [
+      { ko: '네, 데워 주세요.', en: 'Yes, please heat it.', correct: true },
+      { ko: '아니요, 비싸요.', en: 'No, it\'s expensive.', correct: false },
+      { ko: '네, 어디예요?', en: 'Yes, where is it?', correct: false },
+      { ko: '아니요, 많아요.', en: 'No, there\'s a lot.', correct: false }
+    ],
+    note: '드릴까요? = honorific "shall I do for you?" Reply with 네 (yes) + the verb in 주세요 form, or 아니요, 괜찮아요 (no, I\'m fine).'
+  },
+  {
+    tag: 'Meeting a friend',
+    setup: 'A Korean friend you haven\'t seen in a week meets you at a cafe.',
+    theySay: { ko: '오랜만이에요! 잘 지냈어요?', en: 'Long time! Have you been well?' },
+    options: [
+      { ko: '네, 잘 지냈어요.', en: 'Yes, I\'ve been well.', correct: true },
+      { ko: '네, 비싸요.', en: 'Yes, it\'s expensive.', correct: false },
+      { ko: '네, 주세요.', en: 'Yes, please give me.', correct: false },
+      { ko: '네, 어디예요?', en: 'Yes, where is it?', correct: false }
+    ],
+    note: '잘 지냈어요 = past tense of "to be / get along well". The standard answer mirrors the question.'
+  },
+  {
+    tag: 'Subway',
+    setup: 'You\'re at the gate and your T-money card beeps red. A staff member approaches.',
+    theySay: { ko: '카드에 잔액이 부족해요.', en: 'Your card balance is insufficient.' },
+    options: [
+      { ko: '어디서 충전해요?', en: 'Where do I recharge?', correct: true },
+      { ko: '카드 주세요.', en: 'Please give me a card.', correct: false },
+      { ko: '카드 맛있어요.', en: 'The card is delicious.', correct: false },
+      { ko: '카드 많아요.', en: 'There are lots of cards.', correct: false }
+    ],
+    note: '충전하다 = "to charge / top up". 어디서 = "where (at)" — used for actions happening at a location.'
+  },
+  {
+    tag: 'Shopping',
+    setup: 'You\'re at a clothing shop in Hongdae and you want to try something on.',
+    theySay: { ko: '도와 드릴까요?', en: 'Can I help you?' },
+    options: [
+      { ko: '입어 봐도 돼요?', en: 'May I try it on?', correct: true },
+      { ko: '얼마예요?', en: 'How much is it?', correct: false },
+      { ko: '어디예요?', en: 'Where is it?', correct: false },
+      { ko: '맛있어요?', en: 'Is it delicious?', correct: false }
+    ],
+    note: '-아/어 봐도 돼요? = "may I try doing [verb]?" A polite way to ask permission. 입다 = to wear.'
+  },
+  {
+    tag: 'Restaurant · spice',
+    setup: 'You\'re ordering tteokbokki and the server checks how spicy you want it.',
+    theySay: { ko: '많이 매워도 괜찮으세요?', en: 'Is very spicy okay?' },
+    options: [
+      { ko: '조금만 맵게 해 주세요.', en: 'Just a little spicy please.', correct: true },
+      { ko: '많이 좋아요.', en: 'Lots is good.', correct: false },
+      { ko: '어디예요?', en: 'Where is it?', correct: false },
+      { ko: '많아요.', en: 'There\'s a lot.', correct: false }
+    ],
+    note: '조금 = a little. 만 = only / just. 맵게 = "spicily" (adverb form of 맵다). The pattern -게 해 주세요 = "please make it [adverb]".'
+  },
+  {
+    tag: 'Greeting a neighbour',
+    setup: 'You\'re leaving your apartment building in the morning and the security guard nods at you.',
+    theySay: { ko: '안녕하세요. 어디 가세요?', en: 'Hello. Where are you going?' },
+    options: [
+      { ko: '안녕하세요. 회사에 가요.', en: 'Hello. I\'m going to work.', correct: true },
+      { ko: '회사 어디예요?', en: 'Where is the company?', correct: false },
+      { ko: '회사 비싸요.', en: 'The company is expensive.', correct: false },
+      { ko: '회사 주세요.', en: 'Please give me a company.', correct: false }
+    ],
+    note: '에 + 가요 = "go to [place]". This is small talk, not a real question — a short answer is correct and friendly.'
+  },
+];
+
+const SESSION_SIZE = 5;
+
+let session = [];
+let currentIdx = 0;
+let sessionCorrect = 0;
+
+function shuffle(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function buildSession() {
+  session = shuffle(SITUATIONS).slice(0, SESSION_SIZE).map(sit => ({
+    ...sit,
+    options: shuffle(sit.options)
+  }));
+  currentIdx = 0;
+  sessionCorrect = 0;
+}
+
+const stage = document.getElementById('stage');
+const progress = document.getElementById('progress');
+
+function renderSituation() {
+  const s = session[currentIdx];
+  progress.textContent = `${currentIdx + 1} / ${SESSION_SIZE}`;
+
+  stage.innerHTML = `
+    <div class="scene-tag">${s.tag}</div>
+    <div class="setup">${s.setup}</div>
+    <div class="speaker">They say</div>
+    <div class="they-say">
+      ${s.theySay.ko}
+      <div class="they-say-en">${s.theySay.en}</div>
+    </div>
+    <div class="question">You reply</div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="next-bar"><button class="next-btn" id="next">Next →</button></div>
+  `;
+
+  const optsEl = document.getElementById('opts');
+  s.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt.ko;
+    btn.onclick = () => handleAnswer(btn, opt, s);
+    optsEl.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, chosen, sit) {
+  const allBtns = document.querySelectorAll('.opt');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (chosen.correct) {
+    btn.classList.add('correct');
+    sessionCorrect++;
+  } else {
+    btn.classList.add('wrong');
+    allBtns.forEach((b, i) => {
+      if (sit.options[i].correct) b.classList.add('correct');
+      else if (b !== btn) b.classList.add('dim');
+    });
+  }
+
+  const fb = document.getElementById('fb');
+  const correctOpt = sit.options.find(o => o.correct);
+  const glossesHtml = sit.options.map(o => {
+    const marker = o.correct ? '✓' : '·';
+    return `<div class="gloss-row"><span class="gloss-ko">${marker} ${o.ko}</span><span class="gloss-en">${o.en}</span></div>`;
+  }).join('');
+  fb.innerHTML = `
+    <div class="gloss-block">${glossesHtml}</div>
+    <div class="note-row"><strong>Note.</strong> ${sit.note}</div>
+  `;
+  fb.classList.add('show');
+
+  document.getElementById('next').classList.add('show');
+  document.getElementById('next').onclick = nextSituation;
+}
+
+function nextSituation() {
+  currentIdx++;
+  if (currentIdx >= SESSION_SIZE) renderDone();
+  else renderSituation();
+}
+
+function renderDone() {
+  try { KoreanSuiteLogger.log('seoul', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE }] }); } catch(e){}
+  progress.textContent = `${SESSION_SIZE} / ${SESSION_SIZE}`;
+  stage.innerHTML = `
+    <div class="done">
+      <div class="done-num">${sessionCorrect}/${SESSION_SIZE}</div>
+      <div class="done-label">Session complete</div>
+      <button class="restart" id="restart">Another round</button>
+    </div>
+  `;
+  document.getElementById('restart').onclick = startSession;
+}
+
+function startSession() {
+  buildSession();
+  renderSituation();
+}
+
+startSession();
+</script>
+</body>
+</html>
