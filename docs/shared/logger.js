@@ -2,7 +2,7 @@
 // Fire-and-forget session logger. Never blocks UI. Never throws.
 // Webhook URL is set after Simon deploys the Apps Script — see README.
 window.KoreanSuiteLogger = (function () {
-  const WEBHOOK_URL = 'REPLACE_WITH_DEPLOYED_APPS_SCRIPT_URL';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycby-QtFIgDCGvx14ZFbj9PJjC4Mgwd5i_f1ov6aqZUBwU5NwzFjt0zJltXW7UzeOnLs/exec';
 
   function log(appId, payload) {
     if (WEBHOOK_URL.indexOf('REPLACE_') === 0) return;
