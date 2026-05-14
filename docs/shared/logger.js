@@ -14,6 +14,14 @@ window.KoreanSuiteLogger = (function () {
         timestamp: new Date().toISOString(),
         events: payload.events || []
       });
+      // Primary: sendBeacon — purpose-built for fire-and-forget logging,
+      // survives page unload, handles redirects reliably on iOS Safari.
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+        const ok = navigator.sendBeacon(WEBHOOK_URL, blob);
+        if (ok) return;
+      }
+      // Fallback: fetch no-cors. Less reliable across the Apps Script redirect.
       fetch(WEBHOOK_URL, {
         method: 'POST',
         mode: 'no-cors',
