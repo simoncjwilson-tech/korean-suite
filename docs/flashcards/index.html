@@ -120,28 +120,6 @@
 <script src="../shared/logger.js"></script>
 <script>
 const decks = {
-  greetings: { label: "인사 Greetings", cards: [
-    { ko: "안녕하세요", rom: "annyeonghaseyo", en: "Hello / Good day", ex: { ko: "안녕하세요! 처음 뵙겠습니다.", en: "Hello! Nice to meet you." } },
-    { ko: "감사합니다", rom: "gamsahamnida", en: "Thank you (formal)", ex: { ko: "도와주셔서 감사합니다.", en: "Thank you for your help." } },
-    { ko: "죄송합니다", rom: "joesonghamnida", en: "I'm sorry (formal)", ex: { ko: "늦어서 죄송합니다.", en: "I'm sorry for being late." } },
-    { ko: "괜찮아요", rom: "gwaenchanayo", en: "It's okay / I'm fine", ex: { ko: "괜찮아요, 걱정 마세요.", en: "It's okay, don't worry." } },
-    { ko: "안녕히 가세요", rom: "annyeonghi gaseyo", en: "Goodbye (to one leaving)", ex: { ko: "내일 봐요. 안녕히 가세요!", en: "See you tomorrow. Goodbye!" } },
-    { ko: "어떻게 지내세요?", rom: "eotteoke jinaeseyo?", en: "How are you?", ex: { ko: "요즘 어떻게 지내세요?", en: "How have you been lately?" } },
-    { ko: "잘 지내요", rom: "jal jinaeyo", en: "I'm doing well", ex: { ko: "네, 잘 지내요. 감사해요.", en: "Yes, I'm doing well, thanks." } },
-    { ko: "반갑습니다", rom: "bangapseumnida", en: "Nice to meet you", ex: { ko: "처음 뵙겠습니다. 반갑습니다!", en: "Nice to meet you!" } },
-  ]},
-  numbers: { label: "숫자 Numbers", cards: [
-    { ko: "일", rom: "il", en: "One (Sino-Korean)", ex: { ko: "일 층에 있어요.", en: "It's on the first floor." } },
-    { ko: "이", rom: "i", en: "Two (Sino-Korean)", ex: { ko: "이 명이에요.", en: "There are two people." } },
-    { ko: "삼", rom: "sam", en: "Three (Sino-Korean)", ex: { ko: "삼 분만 기다려 주세요.", en: "Please wait just three minutes." } },
-    { ko: "사", rom: "sa", en: "Four (Sino-Korean)", ex: { ko: "사 번 버스예요.", en: "It's bus number four." } },
-    { ko: "오", rom: "o", en: "Five (Sino-Korean)", ex: { ko: "오 천 원이에요.", en: "It's 5,000 won." } },
-    { ko: "하나", rom: "hana", en: "One (Native Korean)", ex: { ko: "하나 주세요.", en: "Please give me one." } },
-    { ko: "둘", rom: "dul", en: "Two (Native Korean)", ex: { ko: "둘 다 맛있어요.", en: "Both are delicious." } },
-    { ko: "셋", rom: "set", en: "Three (Native Korean)", ex: { ko: "셋을 샀어요.", en: "I bought three." } },
-    { ko: "백", rom: "baek", en: "One hundred", ex: { ko: "백 원짜리예요.", en: "It's a 100-won coin." } },
-    { ko: "천", rom: "cheon", en: "One thousand", ex: { ko: "천 원이에요.", en: "It's 1,000 won." } },
-  ]},
   food: { label: "음식 Food", cards: [
     { ko: "밥", rom: "bap", en: "Rice / Meal", ex: { ko: "밥 먹었어요?", en: "Have you eaten?" } },
     { ko: "물", rom: "mul", en: "Water", ex: { ko: "물 한 잔 주세요.", en: "Please give me a glass of water." } },
@@ -152,6 +130,14 @@ const decks = {
     { ko: "불고기", rom: "bulgogi", en: "Bulgogi (grilled beef)", ex: { ko: "불고기 먹으러 갈까요?", en: "Shall we go eat bulgogi?" } },
     { ko: "맵다", rom: "maepda", en: "Spicy", ex: { ko: "이거 너무 매워요!", en: "This is too spicy!" } },
     { ko: "소고기", rom: "sogogi", en: "Beef", ex: { ko: "소고기를 좋아해요.", en: "I like beef." } },
+    { ko: "라면", rom: "ramyeon", en: "Ramyeon (instant noodles)", ex: { ko: "라면을 끓여 먹어요.", en: "I make and eat ramyeon." } },
+    { ko: "비빔밥", rom: "bibimbap", en: "Bibimbap", ex: { ko: "비빔밥 하나 주세요.", en: "One bibimbap, please." } },
+    { ko: "반찬", rom: "banchan", en: "Side dishes", ex: { ko: "반찬이 많아요.", en: "There are a lot of side dishes." } },
+    { ko: "빵", rom: "ppang", en: "Bread", ex: { ko: "아침에 빵을 먹어요.", en: "I eat bread in the morning." } },
+    { ko: "과일", rom: "gwail", en: "Fruit", ex: { ko: "시장에서 과일을 사요.", en: "I buy fruit at the market." } },
+    { ko: "채소", rom: "chaeso", en: "Vegetables", ex: { ko: "채소를 많이 먹어요.", en: "I eat a lot of vegetables." } },
+    { ko: "배고파요", rom: "baegopayo", en: "I'm hungry", ex: { ko: "배고파요, 밥 먹을까요?", en: "I'm hungry, shall we eat?" } },
+    { ko: "주문하다", rom: "jumunhada", en: "To order", ex: { ko: "커피를 주문해요.", en: "I order a coffee." } },
   ]},
   places: { label: "장소 Places", cards: [
     { ko: "병원", rom: "byeongwon", en: "Hospital", ex: { ko: "병원에 가야 해요.", en: "I need to go to the hospital." } },
@@ -231,9 +217,29 @@ const decks = {
     { ko: "퇴근하다", rom: "toegeunhada", en: "To finish work / leave work", ex: { ko: "6시에 퇴근해요.", en: "I finish work at 6." } },
     { ko: "지하철로 출근해요", rom: "jihacheolro chulgeunhaeyo", en: "I commute to work by subway", ex: { ko: "저는 매일 지하철로 출근해요.", en: "I commute to work by subway every day." } },
   ]},
+  mastered: { label: "숙달 Mastered ✅", cards: [
+    { ko: "안녕하세요", rom: "annyeonghaseyo", en: "Hello / Good day", ex: { ko: "안녕하세요! 처음 뵙겠습니다.", en: "Hello! Nice to meet you." } },
+    { ko: "감사합니다", rom: "gamsahamnida", en: "Thank you (formal)", ex: { ko: "도와주셔서 감사합니다.", en: "Thank you for your help." } },
+    { ko: "죄송합니다", rom: "joesonghamnida", en: "I'm sorry (formal)", ex: { ko: "늦어서 죄송합니다.", en: "I'm sorry for being late." } },
+    { ko: "괜찮아요", rom: "gwaenchanayo", en: "It's okay / I'm fine", ex: { ko: "괜찮아요, 걱정 마세요.", en: "It's okay, don't worry." } },
+    { ko: "안녕히 가세요", rom: "annyeonghi gaseyo", en: "Goodbye (to one leaving)", ex: { ko: "내일 봐요. 안녕히 가세요!", en: "See you tomorrow. Goodbye!" } },
+    { ko: "어떻게 지내세요?", rom: "eotteoke jinaeseyo?", en: "How are you?", ex: { ko: "요즘 어떻게 지내세요?", en: "How have you been lately?" } },
+    { ko: "잘 지내요", rom: "jal jinaeyo", en: "I'm doing well", ex: { ko: "네, 잘 지내요. 감사해요.", en: "Yes, I'm doing well, thanks." } },
+    { ko: "반갑습니다", rom: "bangapseumnida", en: "Nice to meet you", ex: { ko: "처음 뵙겠습니다. 반갑습니다!", en: "Nice to meet you!" } },
+    { ko: "일", rom: "il", en: "One (Sino-Korean)", ex: { ko: "일 층에 있어요.", en: "It's on the first floor." } },
+    { ko: "이", rom: "i", en: "Two (Sino-Korean)", ex: { ko: "이 명이에요.", en: "There are two people." } },
+    { ko: "삼", rom: "sam", en: "Three (Sino-Korean)", ex: { ko: "삼 분만 기다려 주세요.", en: "Please wait just three minutes." } },
+    { ko: "사", rom: "sa", en: "Four (Sino-Korean)", ex: { ko: "사 번 버스예요.", en: "It's bus number four." } },
+    { ko: "오", rom: "o", en: "Five (Sino-Korean)", ex: { ko: "오 천 원이에요.", en: "It's 5,000 won." } },
+    { ko: "하나", rom: "hana", en: "One (Native Korean)", ex: { ko: "하나 주세요.", en: "Please give me one." } },
+    { ko: "둘", rom: "dul", en: "Two (Native Korean)", ex: { ko: "둘 다 맛있어요.", en: "Both are delicious." } },
+    { ko: "셋", rom: "set", en: "Three (Native Korean)", ex: { ko: "셋을 샀어요.", en: "I bought three." } },
+    { ko: "백", rom: "baek", en: "One hundred", ex: { ko: "백 원짜리예요.", en: "It's a 100-won coin." } },
+    { ko: "천", rom: "cheon", en: "One thousand", ex: { ko: "천 원이에요.", en: "It's 1,000 won." } },
+  ]},
 };
 
-let currentDeck = 'greetings', currentCards = [], currentIndex = 0;
+let currentDeck = 'places', currentCards = [], currentIndex = 0;
 let isFlipped = false, correct = 0, wrong = 0;
 let direction = 'ko';
 
@@ -413,7 +419,7 @@ Object.entries(decks).forEach(([key, deck]) => {
   catContainer.appendChild(btn);
 });
 
-loadDeck('greetings');
+loadDeck('places');
 </script>
 </body>
 </html>
