@@ -121,19 +121,14 @@
 <script>
 const decks = {
   food: { label: "음식 Food", cards: [
-    { ko: "밥", rom: "bap", en: "Rice / Meal", ex: { ko: "밥 먹었어요?", en: "Have you eaten?" } },
-    { ko: "물", rom: "mul", en: "Water", ex: { ko: "물 한 잔 주세요.", en: "Please give me a glass of water." } },
-    { ko: "맛있어요", rom: "massisseoyo", en: "It's delicious", ex: { ko: "이 김치 정말 맛있어요!", en: "This kimchi is really delicious!" } },
-    { ko: "김치", rom: "kimchi", en: "Kimchi", ex: { ko: "김치를 좋아해요.", en: "I like kimchi." } },
-    { ko: "커피", rom: "keopi", en: "Coffee", ex: { ko: "커피 한 잔 마실게요.", en: "I'll have a cup of coffee." } },
+    // NOTE 2026-06-25 (Saga A/E): graduated 7 overlearned basics into the 숙달 Mastered deck —
+    // 밥, 물, 맛있어요, 김치, 커피, 빵, 라면. Food deck now keeps the grammar-carrying / newer cards. 21 → 14.
     { ko: "맥주", rom: "maekju", en: "Beer", ex: { ko: "맥주 두 잔 주세요.", en: "Two beers please." } },
     { ko: "불고기", rom: "bulgogi", en: "Bulgogi (grilled beef)", ex: { ko: "불고기 먹으러 갈까요?", en: "Shall we go eat bulgogi?" } },
     { ko: "맵다", rom: "maepda", en: "Spicy", ex: { ko: "이거 너무 매워요!", en: "This is too spicy!" } },
     { ko: "소고기", rom: "sogogi", en: "Beef", ex: { ko: "소고기를 좋아해요.", en: "I like beef." } },
-    { ko: "라면", rom: "ramyeon", en: "Ramyeon (instant noodles)", ex: { ko: "라면을 끓여 먹어요.", en: "I make and eat ramyeon." } },
     { ko: "비빔밥", rom: "bibimbap", en: "Bibimbap", ex: { ko: "비빔밥 하나 주세요.", en: "One bibimbap, please." } },
     { ko: "반찬", rom: "banchan", en: "Side dishes", ex: { ko: "반찬이 많아요.", en: "There are a lot of side dishes." } },
-    { ko: "빵", rom: "ppang", en: "Bread", ex: { ko: "아침에 빵을 먹어요.", en: "I eat bread in the morning." } },
     { ko: "과일", rom: "gwail", en: "Fruit", ex: { ko: "시장에서 과일을 사요.", en: "I buy fruit at the market." } },
     { ko: "채소", rom: "chaeso", en: "Vegetables", ex: { ko: "채소를 많이 먹어요.", en: "I eat a lot of vegetables." } },
     { ko: "콩나물", rom: "kongnamul", en: "Bean sprouts", ex: { ko: "콩나물을 좋아해요.", en: "I like bean sprouts." } },
@@ -241,10 +236,48 @@ const decks = {
     { ko: "셋", rom: "set", en: "Three (Native Korean)", ex: { ko: "셋을 샀어요.", en: "I bought three." } },
     { ko: "백", rom: "baek", en: "One hundred", ex: { ko: "백 원짜리예요.", en: "It's a 100-won coin." } },
     { ko: "천", rom: "cheon", en: "One thousand", ex: { ko: "천 원이에요.", en: "It's 1,000 won." } },
+    // Graduated from 음식 Food on 2026-06-25 (Saga A/E) — overlearned basics.
+    { ko: "밥", rom: "bap", en: "Rice / Meal", ex: { ko: "밥 먹었어요?", en: "Have you eaten?" } },
+    { ko: "물", rom: "mul", en: "Water", ex: { ko: "물 한 잔 주세요.", en: "Please give me a glass of water." } },
+    { ko: "맛있어요", rom: "massisseoyo", en: "It's delicious", ex: { ko: "이 김치 정말 맛있어요!", en: "This kimchi is really delicious!" } },
+    { ko: "김치", rom: "kimchi", en: "Kimchi", ex: { ko: "김치를 좋아해요.", en: "I like kimchi." } },
+    { ko: "커피", rom: "keopi", en: "Coffee", ex: { ko: "커피 한 잔 마실게요.", en: "I'll have a cup of coffee." } },
+    { ko: "빵", rom: "ppang", en: "Bread", ex: { ko: "아침에 빵을 먹어요.", en: "I eat bread in the morning." } },
+    { ko: "라면", rom: "ramyeon", en: "Ramyeon (instant noodles)", ex: { ko: "라면을 끓여 먹어요.", en: "I make and eat ramyeon." } },
+  ]},
+  weather_connect: { label: "날씨·연결 Weather & Connectives", cards: [
+    // C (Saga 2026-06-25): fills the connectives / negation gap + seasonal vocab. TTMIK L2, 해요체.
+    { ko: "그래서", rom: "geuraeseo", en: "So / therefore", ex: { ko: "비가 와요. 그래서 집에 있어요.", en: "It's raining. So I'm staying home." } },
+    { ko: "하지만", rom: "hajiman", en: "But / however", ex: { ko: "비싸요. 하지만 사고 싶어요.", en: "It's expensive, but I want to buy it." } },
+    { ko: "그런데", rom: "geureonde", en: "But / by the way", ex: { ko: "더워요. 그런데 에어컨이 없어요.", en: "It's hot. But there's no air conditioner." } },
+    { ko: "그리고", rom: "geurigo", en: "And / and then", ex: { ko: "커피를 마셔요. 그리고 빵을 먹어요.", en: "I drink coffee. And I eat bread." } },
+    { ko: "-고", rom: "-go", en: "And (verb connector: do X and Y)", ex: { ko: "밥을 먹고 학교에 가요.", en: "I eat and go to school." } },
+    { ko: "안", rom: "an", en: "Not (안 + verb negation)", ex: { ko: "오늘은 일 안 해요.", en: "I'm not working today." } },
+    { ko: "-지 않다", rom: "-ji anta", en: "To not (do) — long negation", ex: { ko: "저는 커피를 마시지 않아요.", en: "I don't drink coffee." } },
+    { ko: "날씨", rom: "nalssi", en: "Weather", ex: { ko: "오늘 날씨가 좋아요.", en: "The weather is nice today." } },
+    { ko: "비", rom: "bi", en: "Rain", ex: { ko: "비가 와요.", en: "It's raining." } },
+    { ko: "눈", rom: "nun", en: "Snow", ex: { ko: "겨울에 눈이 와요.", en: "It snows in winter." } },
+    { ko: "더워요", rom: "deowoyo", en: "It's hot", ex: { ko: "여름은 너무 더워요.", en: "Summer is too hot." } },
+    { ko: "추워요", rom: "chuwoyo", en: "It's cold", ex: { ko: "오늘 정말 추워요.", en: "It's really cold today." } },
+    { ko: "흐려요", rom: "heuryeoyo", en: "It's cloudy", ex: { ko: "하늘이 흐려요.", en: "The sky is cloudy." } },
+  ]},
+  time_plans: { label: "시간·약속 Time & Plans", cards: [
+    // D (Saga 2026-06-25): plans / meeting / appointment vocab to complement the time deck in drill.
+    { ko: "약속", rom: "yaksok", en: "Appointment / plans / promise", ex: { ko: "오늘 약속이 있어요.", en: "I have plans today." } },
+    { ko: "만나다", rom: "mannada", en: "To meet", ex: { ko: "친구를 만나요.", en: "I meet a friend." } },
+    { ko: "시간 있어요?", rom: "sigan isseoyo?", en: "Do you have time?", ex: { ko: "내일 시간 있어요?", en: "Do you have time tomorrow?" } },
+    { ko: "언제", rom: "eonje", en: "When", ex: { ko: "언제 만날까요?", en: "When shall we meet?" } },
+    { ko: "어디서", rom: "eodiseo", en: "Where (at)", ex: { ko: "어디서 만날까요?", en: "Where shall we meet?" } },
+    { ko: "주말", rom: "jumal", en: "Weekend", ex: { ko: "주말에 뭐 해요?", en: "What are you doing this weekend?" } },
+    { ko: "다음에", rom: "daeume", en: "Next time", ex: { ko: "다음에 또 만나요.", en: "Let's meet again next time." } },
+    { ko: "늦다", rom: "neutda", en: "To be late", ex: { ko: "조금 늦을 것 같아요.", en: "I think I'll be a little late." } },
+    { ko: "괜찮아요?", rom: "gwaenchanayo?", en: "Is that okay?", ex: { ko: "세 시 괜찮아요?", en: "Is three o'clock okay?" } },
+    { ko: "예약하다", rom: "yeyakhada", en: "To reserve / book", ex: { ko: "식당을 예약했어요.", en: "I booked a restaurant." } },
   ]},
 };
 
-let currentDeck = 'places', currentCards = [], currentIndex = 0;
+// B (Saga 2026-06-25): default deck = verbs_hada — surface the weak Hada-verb deck first so it gets practised.
+let currentDeck = 'verbs_hada', currentCards = [], currentIndex = 0;
 let isFlipped = false, correct = 0, wrong = 0;
 let direction = 'ko';
 
@@ -424,7 +457,7 @@ Object.entries(decks).forEach(([key, deck]) => {
   catContainer.appendChild(btn);
 });
 
-loadDeck('places');
+loadDeck('verbs_hada');
 </script>
 </body>
 </html>
