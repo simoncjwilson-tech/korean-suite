@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Grammar Lessons</title>
+<style>
+  :root {
+    --bg: #f5f1e8;
+    --ink: #1a1a1a;
+    --muted: #6b6358;
+    --accent: #c4452d;
+    --correct: #2d6b3f;
+    --soft: #e8dfcc;
+    --card: #ffffff;
+    --shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(60,40,20,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px 20px 24px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--soft);
+    margin-bottom: 24px;
+    min-height: 28px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .progress {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .back-btn:hover { color: var(--ink); }
+
+  /* Picker */
+  .picker-intro {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .picker-sub {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .deck-list { display: flex; flex-direction: column; gap: 12px; }
+  .deck-card {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 6px;
+    padding: 18px 20px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow);
+    width: 100%;
+    position: relative;
+  }
+  .deck-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .deck-card:active { transform: scale(0.99); }
+  .deck-name {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .deck-en { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .deck-meta {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .due-dot {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .review-all {
+    margin-top: 4px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+  }
+  .review-all .ko { font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
+  .review-all:disabled { opacity: 0.4; cursor: default; }
+
+  /* Lesson stage */
+  .stage { flex: 1; display: flex; flex-direction: column; }
+  .gp-tag {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .gp-pattern {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .gp-en { font-size: 15px; color: var(--muted); margin-bottom: 20px; }
+  .rule {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 16px 18px;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .rule b, .rule .ko {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+  }
+  .ex-title, .turn-title {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .ex {
+    border-bottom: 1px solid var(--soft);
+    padding: 11px 2px;
+  }
+  .ex:last-child { border-bottom: none; }
+  .ex-ko {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 19px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .ex-en { font-size: 14px; color: var(--muted); font-style: italic; margin-top: 2px; }
+  .ttmik {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 18px 0 6px;
+    font-style: italic;
+  }
+  .ttmik a { color: var(--accent); text-decoration: none; }
+
+  /* Your turn */
+  .turn {
+    background: var(--card);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 20px 18px;
+    margin: 22px 0 0;
+    box-shadow: var(--shadow);
+  }
+  .turn-prompt {
+    font-size: 17px;
+    line-height: 1.45;
+    margin-bottom: 6px;
+  }
+  .turn-prompt .ko { font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; font-weight: 600; }
+  .turn-hint { font-size: 13px; color: var(--muted); font-style: italic; }
+  .answer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--soft);
+  }
+  .answer-ko {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--correct);
+    line-height: 1.3;
+  }
+  .answer-en { font-size: 14px; color: var(--muted); font-style: italic; margin-top: 4px; }
+  .answer-note { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+  .answer-note .ko { font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
+
+  .action-bar { margin-top: 22px; text-align: center; }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 15px 30px;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* Self-rate */
+  .rate-q {
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+    margin: 24px 0 14px;
+  }
+  .rate-row { display: flex; flex-direction: column; gap: 10px; }
+  .rate {
+    border: 1px solid var(--soft);
+    background: var(--card);
+    border-radius: 4px;
+    padding: 15px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--ink);
+  }
+  .rate:active { transform: scale(0.99); }
+  .rate.again:hover { border-color: var(--accent); }
+  .rate.hard:hover  { border-color: #b8862d; }
+  .rate.good:hover  { border-color: var(--correct); }
+  .rate small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Done */
+  .done { text-align: center; padding: 36px 20px; }
+  .done-num {
+    font-size: 64px;
+    font-weight: 300;
+    color: var(--correct);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+  .done-label {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .done-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-secondary {
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--soft);
+    border-radius: 4px;
+    padding: 14px 24px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .note-foot {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 28px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div id="leftHeader"></div>
+    <div class="progress" id="progress"></div>
+  </header>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script src="../shared/logger.js"></script>
+<script>
+// ============================================================
+// GRAMMAR LESSONS + SELF-RATED SRS
+//
+// Each LESSON object:
+//   id        unique slug — MUST match grammar_srs.slug in study.db
+//   gp        the grammar pattern (Hangul, shown big)
+//   en        short English name
+//   tag       TTMIK lesson label, e.g. 'TTMIK L2 · L4'
+//   rule      one/two-sentence plain rule (HTML allowed: <b>, <span class=ko>)
+//   examples  [{ko, en}]  — 2-3 worked examples, 해요체
+//   ttmik     optional "see TTMIK Level X Lesson Y" pointer (HTML allowed)
+//   turn      { prompt, hint, answerKo, answerEn, note } — the "your turn"
+//
+// SELF-RATED. No auto-grading of Korean (brittle, erodes trust). Simon
+// attempts, reveals the model answer, and honestly rates himself.
+// Ratings drive the SRS state held in study.db (Saga syncs from logs).
+// ============================================================
+const LESSONS = [
+  {
+    id: 'particles-eun-i',
+    gp: '은/는  vs  이/가',
+    en: 'Topic vs Subject particle',
+    tag: 'TTMIK L1',
+    rule: 'Both mark the thing the sentence is about. <b><span class="ko">은/는</span></b> sets the <b>topic</b> — "as for X" — and often draws a contrast. <b><span class="ko">이/가</span></b> marks the <b>subject</b> — it picks X out, often as new or specific information. Batchim ending → <span class="ko">은 / 이</span>; vowel ending → <span class="ko">는 / 가</span>.',
+    examples: [
+      { ko: '저는 사이먼이에요.', en: "As for me, I'm Simon. (topic: introducing myself)" },
+      { ko: '날씨가 좋아요.', en: "The weather is nice. (subject: the weather, specifically)" },
+      { ko: '커피는 좋아하는데 차는 싫어해요.', en: "Coffee I like, but tea I dislike. (contrast — that's 은/는)" },
+    ],
+    ttmik: 'The contrast is subtle — for the full treatment see <a href="https://talktomeinkorean.com">TTMIK Level 1, Lessons 9 & 17</a>.',
+    turn: {
+      prompt: 'Say: "The coffee is hot" — picking out the coffee specifically.',
+      hint: 'hot (warm) = <span class="ko">뜨거워요</span>. Which particle picks out a specific subject?',
+      answerKo: '커피가 뜨거워요.',
+      answerEn: 'The coffee is hot.',
+      note: '<span class="ko">가</span> because 커피 ends in a vowel and you\'re stating a fact about it. <span class="ko">커피는</span> would shift the nuance to "the coffee (as opposed to something else) is hot."',
+    },
+  },
+  {
+    id: 'past-tense',
+    gp: '-았/었어요',
+    en: 'Past tense (해요체)',
+    tag: 'TTMIK L2 · L4',
+    rule: 'Past tense in 해요체. Take the verb stem and apply vowel harmony: stem vowel <span class="ko">ㅏ/ㅗ</span> → <b><span class="ko">-았어요</span></b>; everything else → <b><span class="ko">-었어요</span></b>. <span class="ko">하다</span> verbs become <b><span class="ko">했어요</span></b>.',
+    examples: [
+      { ko: '어제 친구를 만났어요.', en: 'I met a friend yesterday. (만나다 → 만났어요)' },
+      { ko: '점심을 먹었어요.', en: 'I ate lunch. (먹다 → 먹었어요)' },
+      { ko: '주말에 운동했어요.', en: 'I exercised at the weekend. (운동하다 → 운동했어요)' },
+    ],
+    ttmik: 'Full conjugation walkthrough: <a href="https://talktomeinkorean.com">TTMIK Level 2, Lesson 4</a>.',
+    turn: {
+      prompt: 'Say: "I drank coffee" in the past tense.',
+      hint: 'to drink = <span class="ko">마시다</span>, stem <span class="ko">마시-</span>. Stem vowel is ㅣ, so which ending?',
+      answerKo: '커피를 마셨어요.',
+      answerEn: 'I drank coffee.',
+      note: '마시 + 었어요 contracts to <span class="ko">마셨어요</span>. Not 마시었어요 — the ㅣ+어 fuses to 셨.',
+    },
+  },
+  {
+    id: 'future-tense',
+    gp: '-(으)ㄹ 거예요',
+    en: 'Future tense',
+    tag: 'TTMIK L2 · L1',
+    rule: 'Plans and intentions — "will / going to". Vowel-ending or <span class="ko">ㄹ</span>-ending stem → <b><span class="ko">-ㄹ 거예요</span></b>; batchim-ending stem → <b><span class="ko">-을 거예요</span></b>.',
+    examples: [
+      { ko: '내일 친구를 만날 거예요.', en: "I'll meet a friend tomorrow. (만나다 → 만날 거예요)" },
+      { ko: '집에서 쉴 거예요.', en: "I'll rest at home. (쉬다 → 쉴 거예요)" },
+      { ko: '책을 읽을 거예요.', en: "I'll read a book. (읽다 → 읽을 거예요, batchim ㄱ)" },
+    ],
+    ttmik: 'Introduced in <a href="https://talktomeinkorean.com">TTMIK Level 2, Lesson 1</a>.',
+    turn: {
+      prompt: 'Say: "I will go to Seoul tomorrow."',
+      hint: 'tomorrow = <span class="ko">내일</span>, to go = <span class="ko">가다</span> (vowel-ending stem), Seoul = <span class="ko">서울</span> + 에.',
+      answerKo: '내일 서울에 갈 거예요.',
+      answerEn: 'I will go to Seoul tomorrow.',
+      note: '가 ends in a vowel, so <span class="ko">갈 거예요</span>. 거예요 is pronounced "geo-ye-yo" but is often heard as "kkeo-ye-yo".',
+    },
+  },
+  {
+    id: 'hada-verbs',
+    gp: '하다 동사',
+    en: '하다 verb conjugation',
+    tag: 'TTMIK L2 · L1–6',
+    rule: 'A huge class of verbs is <b>noun + <span class="ko">하다</span></b> (to do). They all conjugate the same way: present <b><span class="ko">해요</span></b>, past <b><span class="ko">했어요</span></b>, future <b><span class="ko">할 거예요</span></b>. Learn one, you have them all.',
+    examples: [
+      { ko: '한국어를 공부해요.', en: 'I study Korean. (공부하다 → 공부해요)' },
+      { ko: '어제 일했어요.', en: 'I worked yesterday. (일하다 → 일했어요)' },
+      { ko: '저녁에 운동할 거예요.', en: "I'll exercise in the evening. (운동하다 → 운동할 거예요)" },
+    ],
+    ttmik: 'See <a href="https://talktomeinkorean.com">TTMIK Level 2, Lessons 1–6</a>.',
+    turn: {
+      prompt: 'Say: "I made a reservation" (past tense of 예약하다, to reserve).',
+      hint: 'All 하다 verbs take the same past form.',
+      answerKo: '예약했어요.',
+      answerEn: 'I made a reservation / I reserved.',
+      note: '예약 + 했어요. Every 하다 verb behaves identically — the only thing that changes is the noun in front.',
+    },
+  },
+  {
+    id: 'neg-an',
+    gp: '안 + 동사',
+    en: 'Short negation',
+    tag: 'TTMIK L1 · L2',
+    rule: 'The quick way to say "not". Put <b><span class="ko">안</span></b> directly <b>before</b> the verb. With <span class="ko">하다</span> verbs the <span class="ko">안</span> slips between the noun and <span class="ko">하다</span>: <span class="ko">공부 안 해요</span>.',
+    examples: [
+      { ko: '오늘 학교에 안 가요.', en: "I'm not going to school today." },
+      { ko: '저는 커피를 안 마셔요.', en: "I don't drink coffee." },
+      { ko: '주말에 일 안 해요.', en: "I don't work at the weekend. (하다 verb → 안 splits in)" },
+    ],
+    turn: {
+      prompt: 'Say: "I\'m not eating now."',
+      hint: 'now = <span class="ko">지금</span>, to eat = <span class="ko">먹다</span> → 먹어요. Where does 안 go?',
+      answerKo: '지금 안 먹어요.',
+      answerEn: "I'm not eating now.",
+      note: '안 sits immediately before the conjugated verb: <span class="ko">안 먹어요</span>.',
+    },
+  },
+  {
+    id: 'neg-ji-anta',
+    gp: '-지 않다',
+    en: 'Long negation',
+    tag: 'TTMIK L2',
+    rule: 'The longer, slightly more formal negation. Attach <b><span class="ko">-지 않아요</span></b> to the verb stem. Same meaning as <span class="ko">안</span>, but it never splits a 하다 verb and is common in writing.',
+    examples: [
+      { ko: '오늘 학교에 가지 않아요.', en: "I'm not going to school today. (가다 → 가지 않아요)" },
+      { ko: '저는 커피를 마시지 않아요.', en: "I don't drink coffee. (마시다 → 마시지 않아요)" },
+      { ko: '주말에 일하지 않아요.', en: "I don't work at the weekend. (일하다 → 일하지 않아요)" },
+    ],
+    ttmik: 'Long-form negation: <a href="https://talktomeinkorean.com">TTMIK Level 2</a>.',
+    turn: {
+      prompt: 'Rewrite "지금 안 먹어요" using long negation instead.',
+      hint: 'stem 먹- + 지 않아요.',
+      answerKo: '지금 먹지 않아요.',
+      answerEn: "I'm not eating now.",
+      note: 'Stem + <span class="ko">지 않아요</span>. Same meaning as <span class="ko">안 먹어요</span>; this form just attaches to the stem.',
+    },
+  },
+  {
+    id: 'conj-geuraeseo',
+    gp: '그래서',
+    en: 'So / therefore',
+    tag: 'TTMIK L1',
+    rule: 'Sentence-starting connective meaning <b>"so / therefore"</b>. The first sentence is the cause; <span class="ko">그래서</span> opens the result. Compare: <span class="ko">그런데</span> = but/by the way, <span class="ko">그리고</span> = and.',
+    examples: [
+      { ko: '비가 와요. 그래서 집에 있어요.', en: "It's raining. So I'm staying home." },
+      { ko: '배가 고팠어요. 그래서 밥을 먹었어요.', en: 'I was hungry, so I ate.' },
+      { ko: '바빠요. 그래서 운동 안 해요.', en: "I'm busy, so I don't exercise." },
+    ],
+    turn: {
+      prompt: 'Join these: "I\'m tired" (피곤해요) + "I\'ll rest" using 그래서.',
+      hint: 'cause sentence, then 그래서, then result. to rest = 쉬다 → future 쉴 거예요.',
+      answerKo: '피곤해요. 그래서 쉴 거예요.',
+      answerEn: "I'm tired, so I'll rest.",
+      note: '그래서 always opens the <b>result</b> clause. The cause comes first.',
+    },
+  },
+  {
+    id: 'time-hour',
+    gp: '시 (native numbers)',
+    en: 'Telling the hour',
+    tag: 'TTMIK L1 · L2',
+    rule: 'Hours use <b>native Korean numbers</b> + <b><span class="ko">시</span></b>. Crucially, 1–4 take their short counter forms: <span class="ko">한 시, 두 시, 세 시, 네 시</span>. Minutes use Sino-Korean numbers + <span class="ko">분</span> (a different system).',
+    examples: [
+      { ko: '지금 세 시예요.', en: "It's three o'clock now." },
+      { ko: '일곱 시에 만나요.', en: "Let's meet at seven." },
+      { ko: '두 시 반이에요.', en: "It's half past two. (반 = half)" },
+    ],
+    ttmik: 'Time and native numbers: <a href="https://talktomeinkorean.com">TTMIK Level 1, Lessons 16 & 18</a>.',
+    turn: {
+      prompt: 'Say: "Let\'s meet at four o\'clock."',
+      hint: "four o'clock — remember 4 changes form before 시. to meet (해요체) = 만나요, with 에 for time.",
+      answerKo: '네 시에 만나요.',
+      answerEn: "Let's meet at four.",
+      note: '넷 becomes <span class="ko">네</span> before 시 — same shortening as 하나→한, 둘→두, 셋→세.',
+    },
+  },
+];
+
+// ============================================================
+// State
+// ============================================================
+let session = [];
+let currentIdx = 0;
+let phase = 'lesson';        // 'lesson' | 'turn' | 'answer' | 'rate'
+let ratings = [];            // { id, rating } per card
+
+const stage = document.getElementById('stage');
+const progress = document.getElementById('progress');
+const leftHeader = document.getElementById('leftHeader');
+
+function shuffle(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============================================================
+// PICKER
+// ============================================================
+function renderPicker() {
+  leftHeader.innerHTML = `<span class="title">Grammar</span>`;
+  progress.textContent = '';
+  stage.innerHTML = `
+    <div class="picker-intro">Lessons + self-rated review</div>
+    <div class="picker-sub">Read the rule, do the "your turn", then rate yourself honestly.</div>
+    <button class="review-all" id="reviewAll">Review all ${LESSONS.length} grammar points</button>
+    <div style="height:18px"></div>
+    <div class="deck-list" id="deckList"></div>
+  `;
+  document.getElementById('reviewAll').onclick = () => startSession(shuffle(LESSONS));
+
+  const list = document.getElementById('deckList');
+  LESSONS.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'deck-card';
+    btn.innerHTML = `
+      <div class="deck-name">${l.gp}</div>
+      <div class="deck-en">${l.en}</div>
+      <div class="deck-meta">${l.tag}</div>
+    `;
+    btn.onclick = () => startSession([l]);
+    list.appendChild(btn);
+  });
+}
+
+// ============================================================
+// SESSION
+// ============================================================
+function startSession(lessons) {
+  session = lessons;
+  currentIdx = 0;
+  ratings = [];
+  phase = 'lesson';
+  renderStage();
+}
+
+function renderStage() {
+  const l = session[currentIdx];
+  leftHeader.innerHTML = `<button class="back-btn" id="backBtn">← Grammar</button>`;
+  document.getElementById('backBtn').onclick = renderPicker;
+  progress.textContent = `${currentIdx + 1} / ${session.length}`;
+
+  if (phase === 'lesson') renderLesson(l);
+  else if (phase === 'turn') renderTurn(l, false);
+  else if (phase === 'answer') renderTurn(l, true);
+  else if (phase === 'rate') renderRate(l);
+}
+
+function renderLesson(l) {
+  const examples = l.examples.map(e =>
+    `<div class="ex"><div class="ex-ko">${e.ko}</div><div class="ex-en">${e.en}</div></div>`
+  ).join('');
+  const ttmik = l.ttmik ? `<div class="ttmik">${l.ttmik}</div>` : '';
+  stage.innerHTML = `
+    <div class="gp-tag">${l.tag}</div>
+    <div class="gp-pattern">${l.gp}</div>
+    <div class="gp-en">${l.en}</div>
+    <div class="rule">${l.rule}</div>
+    <div class="ex-title">Examples</div>
+    ${examples}
+    ${ttmik}
+    <div class="action-bar"><button class="btn-primary" id="go">Your turn →</button></div>
+  `;
+  document.getElementById('go').onclick = () => { phase = 'turn'; renderStage(); };
+}
+
+function renderTurn(l, reveal) {
+  const t = l.turn;
+  const answerHtml = reveal ? `
+    <div class="answer">
+      <div class="answer-ko">${t.answerKo}</div>
+      <div class="answer-en">${t.answerEn}</div>
+      ${t.note ? `<div class="answer-note">${t.note}</div>` : ''}
+    </div>` : '';
+  const btn = reveal
+    ? `<button class="btn-primary" id="go">Rate yourself →</button>`
+    : `<button class="btn-primary" id="go">Show answer</button>`;
+  stage.innerHTML = `
+    <div class="gp-tag">${l.gp} · ${l.en}</div>
+    <div class="turn">
+      <div class="turn-title">Your turn</div>
+      <div class="turn-prompt">${t.prompt}</div>
+      ${t.hint ? `<div class="turn-hint">${t.hint}</div>` : ''}
+      ${answerHtml}
+    </div>
+    <div class="action-bar">${btn}</div>
+  `;
+  document.getElementById('go').onclick = () => {
+    phase = reveal ? 'rate' : 'answer';
+    renderStage();
+  };
+}
+
+function renderRate(l) {
+  stage.innerHTML = `
+    <div class="gp-tag">${l.gp} · ${l.en}</div>
+    <div class="rate-q">How did that go? Be honest — it sets when this comes back.</div>
+    <div class="rate-row">
+      <button class="rate again" data-r="again">Missed it<small>Couldn't produce it / got it wrong — show me again soon</small></button>
+      <button class="rate hard"  data-r="hard">Shaky<small>Got there with effort or a peek — needs more reps</small></button>
+      <button class="rate good"  data-r="good">Solid<small>Produced it cleanly — space this one out</small></button>
+    </div>
+  `;
+  document.querySelectorAll('.rate').forEach(b => {
+    b.onclick = () => {
+      ratings.push({ id: l.id, rating: b.dataset.r });
+      currentIdx++;
+      if (currentIdx >= session.length) renderDone();
+      else { phase = 'lesson'; renderStage(); }
+    };
+  });
+}
+
+function renderDone() {
+  // Log per-point self-ratings so Saga can sync grammar_srs from study.db.
+  try {
+    KoreanSuiteLogger.log('grammar', {
+      deckId: session.length === LESSONS.length ? 'all' : (session[0] && session[0].id),
+      events: [{
+        type: 'session_complete',
+        total: ratings.length,
+        good: ratings.filter(r => r.rating === 'good').length,
+        hard: ratings.filter(r => r.rating === 'hard').length,
+        again: ratings.filter(r => r.rating === 'again').length,
+        ratings: ratings
+      }]
+    });
+  } catch (e) {}
+
+  const solid = ratings.filter(r => r.rating === 'good').length;
+  leftHeader.innerHTML = `<button class="back-btn" id="backBtn">← Grammar</button>`;
+  document.getElementById('backBtn').onclick = renderPicker;
+  progress.textContent = `${ratings.length} / ${ratings.length}`;
+  stage.innerHTML = `
+    <div class="done">
+      <div class="done-num">${solid}/${ratings.length}</div>
+      <div class="done-label">rated solid</div>
+      <div class="done-actions">
+        <button class="btn-primary" id="again" style="width:auto">Again</button>
+        <button class="btn-secondary" id="back">Grammar menu</button>
+      </div>
+      <div class="note-foot">Your ratings feed Saga's spaced-review schedule.<br>"Missed" and "Shaky" points come back sooner.</div>
+    </div>
+  `;
+  document.getElementById('again').onclick = () => startSession(session);
+  document.getElementById('back').onclick = renderPicker;
+}
+
+// boot
+renderPicker();
+</script>
+</body>
+</html>
