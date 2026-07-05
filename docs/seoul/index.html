@@ -347,6 +347,18 @@ const SITUATIONS = [
     note: '계산하다 = "to calculate / pay". -ㄹ게요 = "I\'ll do [verb]" — a soft promise or intention.'
   },
   {
+    tag: 'Cafe · seat',
+    setup: 'You just arrived at your regular cafe and want a window seat.',
+    theySay: { ko: '어떤 자리 원하세요?', en: 'What kind of seat would you like?' },
+    options: [
+      { ko: '창가 자리요. 지금 막 도착했어요.', en: 'A window seat, please. I just arrived now.', correct: true },
+      { ko: '예약했어요. 회사에 늦었어요.', en: 'I booked it. I was late for work.', correct: false },
+      { ko: '이따 봐요. 주문했어요.', en: 'See you later. I ordered.', correct: false },
+      { ko: '근처에 가도 돼요.', en: 'It is okay to go nearby.', correct: false }
+    ],
+    note: '자리 = seat/place. 지금 막 + past tense means "just now": 지금 막 도착했어요 = "I just arrived now."'
+  },
+  {
     tag: 'Bakery',
     setup: 'You point at a pastry. The server asks if you want it heated up.',
     theySay: { ko: '데워 드릴까요?', en: 'Shall I heat it up for you?' },
