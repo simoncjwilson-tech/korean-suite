@@ -359,6 +359,18 @@ const SITUATIONS = [
     note: '자리 = seat/place. 지금 막 + past tense means "just now": 지금 막 도착했어요 = "I just arrived now."'
   },
   {
+    tag: 'Neighbourhood · home',
+    setup: 'Someone asks which building you live in. You point to an apartment building over there.',
+    theySay: { ko: '어디에 살아요?', en: 'Where do you live?' },
+    options: [
+      { ko: '저는 저 아파트에 살아요.', en: 'I live in that apartment.', correct: true },
+      { ko: '저는 이 아파트에 살아요.', en: 'I live in this apartment.', correct: false },
+      { ko: '저는 저 아파트에서 일해요.', en: 'I work in that apartment.', correct: false },
+      { ko: '저 아파트가 어디예요?', en: 'Where is that apartment?', correct: false }
+    ],
+    note: '저는 = "as for me" (저, humble I + 는, topic marker). 저 아파트 = "that apartment over there". Place + 에 살아요 = "live at/in [place]".'
+  },
+  {
     tag: 'Bakery',
     setup: 'You point at a pastry. The server asks if you want it heated up.',
     theySay: { ko: '데워 드릴까요?', en: 'Shall I heat it up for you?' },
