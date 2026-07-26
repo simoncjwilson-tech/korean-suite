@@ -293,8 +293,9 @@ const decks = {
   ]},
 };
 
-// B (Saga 2026-06-25): default deck = verbs_hada — surface the weak Hada-verb deck first so it gets practised.
-let currentDeck = 'verbs_hada', currentCards = [], currentIndex = 0;
+// Saga 2026-07-26: default deck = verbs_motion — verbs_hada has recovered (see assessment); verbs_motion is now
+// the clearest weak spot (65.7%, no improvement trend), so surface it first to get it practised.
+let currentDeck = 'verbs_motion', currentCards = [], currentIndex = 0;
 let isFlipped = false, correct = 0, wrong = 0;
 let direction = 'ko';
 
@@ -474,7 +475,7 @@ Object.entries(decks).forEach(([key, deck]) => {
   catContainer.appendChild(btn);
 });
 
-loadDeck('verbs_hada');
+loadDeck('verbs_motion');
 </script>
 </body>
 </html>
