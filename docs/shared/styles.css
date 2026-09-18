@@ -1,11 +1,26 @@
 /* shared/styles.css — base resets and shared utilities for the Korean Suite */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+:root { --ks-bottom-clearance: env(safe-area-inset-bottom); }
+
+/*
+ * ChatGPT's iOS in-app browser places its share / "Open in Safari" rail over
+ * the page. The rail is host chrome, so CSS cannot move it; reserve a scroll
+ * tail instead. Installed Home Screen apps retain safe-area-only spacing.
+ */
+@supports (-webkit-touch-callout: none) {
+  :root { --ks-bottom-clearance: max(env(safe-area-inset-bottom), 8rem); }
+  @media (display-mode: standalone) {
+    :root { --ks-bottom-clearance: env(safe-area-inset-bottom); }
+  }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #f5f1e8;
   color: #1a2520;
   -webkit-text-size-adjust: 100%;
+  padding-bottom: var(--ks-bottom-clearance) !important;
 }
 button { font: inherit; cursor: pointer; }
 .ks-suite-nav {
