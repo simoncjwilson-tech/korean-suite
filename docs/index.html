@@ -10,28 +10,95 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Korean Suite</title>
   <link rel="stylesheet" href="shared/styles.css">
+  <script src="shared/theme.js"></script>
   <style>
-    body { display: flex; flex-direction: column; align-items: center; padding: calc(env(safe-area-inset-top) + 32px) 16px calc(env(safe-area-inset-bottom) + 32px); }
+    :root {
+      --bg: #f5f1e8;
+      --ink: #1a2520;
+      --muted: #666;
+      --subtitle: #777;
+      --card: #ffffff;
+      --soft: #e8dfcc;
+      --accent: #c4452d;
+      --shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(60,40,20,0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1b1714;
+        --ink: #ede6d9;
+        --muted: #a89e8c;
+        --subtitle: #a89e8c;
+        --card: #262019;
+        --soft: #3a3229;
+        --accent: #e2694a;
+        --shadow: 0 1px 0 rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.55);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1b1714;
+      --ink: #ede6d9;
+      --muted: #a89e8c;
+      --subtitle: #a89e8c;
+      --card: #262019;
+      --soft: #3a3229;
+      --accent: #e2694a;
+      --shadow: 0 1px 0 rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.55);
+    }
+    :root[data-theme="light"] {
+      --bg: #f5f1e8;
+      --ink: #1a2520;
+      --muted: #666;
+      --subtitle: #777;
+      --card: #ffffff;
+      --soft: #e8dfcc;
+      --accent: #c4452d;
+      --shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(60,40,20,0.08);
+    }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    body { background: var(--bg); color: var(--ink); display: flex; flex-direction: column; align-items: center; padding: calc(env(safe-area-inset-top) + 32px) 16px calc(env(safe-area-inset-bottom) + 32px); }
+    .hub-top { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 380px; margin: 0 auto; }
     h1 { margin: 0 0 8px; font-size: 28px; }
-    .subtitle { color: #777; font-size: 14px; margin-bottom: 32px; }
+    .theme-toggle {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--soft);
+      border-radius: 8px;
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
+    .subtitle { color: var(--subtitle); font-size: 14px; margin-bottom: 32px; }
     .grid { display: grid; gap: 12px; width: 100%; max-width: 380px; }
     .card {
       display: block;
       padding: 18px 20px;
-      background: #ffffff;
-      border: 1px solid #e8dfcc;
+      background: var(--card);
+      border: 1px solid var(--soft);
       border-radius: 12px;
       text-decoration: none;
-      color: #1a2520;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(60,40,20,0.08);
+      color: var(--ink);
+      box-shadow: var(--shadow);
     }
-    .card:hover { border-color: #c4452d; }
+    .card:hover { border-color: var(--accent); }
     .card h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
-    .card p { margin: 0; color: #666; font-size: 13px; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; }
   </style>
 </head>
 <body>
-  <h1>한국어 Suite</h1>
+  <div class="hub-top">
+    <h1>한국어 Suite</h1>
+    <button class="theme-toggle" data-ks-theme-toggle type="button" aria-label="Theme: Auto (follows system) - tap to change">
+      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"></svg>
+    </button>
+  </div>
   <p class="subtitle">Simon's Korean learning apps</p>
   <div class="grid">
     <a class="card" href="flashcards/">

@@ -10,6 +10,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Listening Match</title>
 <link rel="stylesheet" href="../shared/styles.css">
+<script src="../shared/theme.js"></script>
 <style>
   :root {
     --bg: #ebf0ee;
@@ -20,7 +21,61 @@
     --wrong: #b04848;
     --soft: #d4dbd6;
     --card: #ffffff;
+    --on-accent: #fff;
+    --warn-bg: #fef0e0;
+    --warn-border: #d4a574;
+    --warn-ink: #6b4a20;
   }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141917;
+      --ink: #e7ede9;
+      --muted: #93a099;
+      --accent: #5fbf98;
+      --correct: #52c76b;
+      --wrong: #e2726a;
+      --soft: #2c3530;
+      --card: #1c2320;
+      --on-accent: #141917;
+      --warn-bg: #3a2c16;
+      --warn-border: #d4a574;
+      --warn-ink: #f0dcb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141917;
+    --ink: #e7ede9;
+    --muted: #93a099;
+    --accent: #5fbf98;
+    --correct: #52c76b;
+    --wrong: #e2726a;
+    --soft: #2c3530;
+    --card: #1c2320;
+    --on-accent: #141917;
+    --warn-bg: #3a2c16;
+    --warn-border: #d4a574;
+    --warn-ink: #f0dcb8;
+  }
+  :root[data-theme="light"] {
+    --bg: #ebf0ee;
+    --ink: #1a2520;
+    --muted: #6f7a73;
+    --accent: #2a6f5a;
+    --correct: #2a6f5a;
+    --wrong: #b04848;
+    --soft: #d4dbd6;
+    --card: #ffffff;
+    --on-accent: #fff;
+    --warn-bg: #fef0e0;
+    --warn-border: #d4a574;
+    --warn-ink: #6b4a20;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-color-scheme: dark) {
+    body .opt.dim { opacity: 0.5; }
+  }
+  :root[data-theme="dark"] .opt.dim { opacity: 0.5; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; overscroll-behavior: none; }
   body {
@@ -41,11 +96,28 @@
   header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--soft);
     margin-bottom: 32px;
   }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .theme-toggle {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--soft);
+    border-radius: 8px;
+    color: var(--muted);
+    width: 36px;
+    height: 36px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
   .title {
     font-size: 13px;
     font-weight: 600;
@@ -82,7 +154,7 @@
     border-radius: 50%;
     background: var(--accent);
     border: none;
-    color: #fff;
+    color: var(--on-accent);
     cursor: pointer;
     margin-bottom: 16px;
     transition: transform 0.15s ease, background 0.15s ease;
@@ -92,7 +164,7 @@
   }
   .play-btn:active { transform: scale(0.95); }
   .play-btn.playing { background: var(--ink); }
-  .play-btn svg { width: 36px; height: 36px; fill: #fff; }
+  .play-btn svg { width: 36px; height: 36px; fill: var(--on-accent); }
   .play-hint {
     font-size: 12px;
     color: var(--muted);
@@ -146,8 +218,8 @@
     line-height: 1.3;
   }
   .opt:active { transform: scale(0.99); }
-  .opt.correct { background: var(--correct); color: #fff; border-color: var(--correct); }
-  .opt.wrong { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+  .opt.correct { background: var(--correct); color: var(--on-accent); border-color: var(--correct); }
+  .opt.wrong { background: var(--wrong); color: var(--on-accent); border-color: var(--wrong); }
   .opt.dim { opacity: 0.4; }
   .opt:disabled { cursor: default; }
   .next-bar { margin-top: 24px; text-align: center; min-height: 48px; }
@@ -168,13 +240,13 @@
   .next-btn.show { opacity: 1; }
 
   .warning {
-    background: #fef0e0;
-    border: 1px solid #d4a574;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
     border-radius: 4px;
     padding: 12px 16px;
     font-size: 13px;
     line-height: 1.5;
-    color: #6b4a20;
+    color: var(--warn-ink);
     margin-bottom: 20px;
   }
 
@@ -207,7 +279,7 @@
   .totals .lbl { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
   .restart {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: none;
     border-radius: 4px;
     padding: 14px 36px;
@@ -224,7 +296,12 @@
 <div class="wrap">
   <header>
     <div class="title">Listening Match</div>
-    <div class="progress" id="progress">— / 6</div>
+    <div class="header-right">
+      <div class="progress" id="progress">— / 6</div>
+      <button class="theme-toggle" data-ks-theme-toggle type="button" aria-label="Theme: Auto (follows system) - tap to change">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"></svg>
+      </button>
+    </div>
   </header>
   <div class="stage" id="stage">
     <div class="loading">Loading…</div>
