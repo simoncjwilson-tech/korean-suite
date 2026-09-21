@@ -450,6 +450,7 @@ const SESSION_SIZE = 5;
 let session = [];
 let currentIdx = 0;
 let sessionCorrect = 0;
+let itemsThisSession = []; // per-item results for error logging: {id, given, expected, correct}
 
 function shuffle(a) {
   const arr = [...a];
@@ -467,6 +468,7 @@ function buildSession() {
   }));
   currentIdx = 0;
   sessionCorrect = 0;
+  itemsThisSession = [];
 }
 
 const stage = document.getElementById('stage');
@@ -504,6 +506,8 @@ function handleAnswer(btn, chosen, sit) {
   const allBtns = document.querySelectorAll('.opt');
   allBtns.forEach(b => b.disabled = true);
 
+  const correctOptItem = sit.options.find(o => o.correct);
+  itemsThisSession.push({ id: sit.theySay.ko, given: chosen.ko, expected: correctOptItem && correctOptItem.ko, correct: !!chosen.correct });
   if (chosen.correct) {
     btn.classList.add('correct');
     sessionCorrect++;
@@ -538,7 +542,7 @@ function nextSituation() {
 }
 
 function renderDone() {
-  try { KoreanSuiteLogger.log('seoul', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE }] }); } catch(e){}
+  try { KoreanSuiteLogger.log('seoul', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE, modality: 'production', items: itemsThisSession }] }); } catch(e){}
   progress.textContent = `${SESSION_SIZE} / ${SESSION_SIZE}`;
   stage.innerHTML = `
     <div class="done">

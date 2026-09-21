@@ -386,6 +386,7 @@ const SESSION_SIZE = 6;
 let session = [];
 let currentIdx = 0;
 let sessionCorrect = 0;
+let itemsThisSession = []; // per-item results for error logging: {id, given, expected, correct}
 let koreanVoice = null;
 let voicesReady = false;
 
@@ -432,6 +433,7 @@ function buildSession() {
   });
   currentIdx = 0;
   sessionCorrect = 0;
+  itemsThisSession = [];
 }
 
 const stage = document.getElementById('stage');
@@ -498,7 +500,9 @@ function handleAnswer(btn, chosen, card) {
   const allBtns = document.querySelectorAll('.opt');
   allBtns.forEach(b => b.disabled = true);
 
-  if (chosen === card.en) {
+  const isCorrect = chosen === card.en;
+  itemsThisSession.push({ id: card.ko, given: chosen, expected: card.en, correct: isCorrect });
+  if (isCorrect) {
     btn.classList.add('correct');
     sessionCorrect++;
   } else {
@@ -523,7 +527,7 @@ function nextCard() {
 }
 
 function renderDone() {
-  try { KoreanSuiteLogger.log('listening', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE }] }); } catch(e){}
+  try { KoreanSuiteLogger.log('listening', { events: [{ type: 'session_complete', correct: sessionCorrect, total: SESSION_SIZE, modality: 'recognition', items: itemsThisSession }] }); } catch(e){}
   progress.textContent = `${SESSION_SIZE} / ${SESSION_SIZE}`;
   stage.innerHTML = `
     <div class="done">

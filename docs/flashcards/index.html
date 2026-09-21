@@ -392,6 +392,13 @@ const decks = {
 let currentDeck = 'verbs_motion', currentCards = [], currentIndex = 0;
 let isFlipped = false, correct = 0, wrong = 0;
 let direction = 'ko';
+let itemsThisSession = []; // per-item results for error logging: {id, expected, correct}
+
+function recordItem(card, isCorrect) {
+  // Flashcards are self-graded (no "given" answer text) — the id is the
+  // card's Korean form; "expected" is whichever side was being recalled.
+  itemsThisSession.push({ id: card.ko, expected: direction === 'ko' ? card.en : card.ko, correct: isCorrect });
+}
 
 function setDirection(dir) {
   direction = dir;
@@ -411,7 +418,7 @@ function shuffle(arr) {
 
 function loadDeck(key) {
   currentDeck = key; currentCards = shuffle(decks[key].cards);
-  currentIndex = 0; correct = 0; wrong = 0; isFlipped = false;
+  currentIndex = 0; correct = 0; wrong = 0; isFlipped = false; itemsThisSession = [];
   const ci = document.getElementById('cardInner');
   ci.style.transition = 'none'; ci.style.transform = ''; ci.style.opacity = '1';
   ci.classList.remove('flipped');
@@ -481,8 +488,8 @@ function flipCard() {
   document.getElementById('cardInner').classList.toggle('flipped', isFlipped);
 }
 
-function markCorrect() { correct++; animateOut(1); }
-function markWrong() { wrong++; animateOut(-1); }
+function markCorrect() { recordItem(currentCards[currentIndex], true); correct++; animateOut(1); }
+function markWrong() { recordItem(currentCards[currentIndex], false); wrong++; animateOut(-1); }
 
 function animateOut(dir) {
   const ci = document.getElementById('cardInner');
@@ -493,7 +500,7 @@ function animateOut(dir) {
 }
 
 function showScore() {
-  try { KoreanSuiteLogger.log('flashcards', { deckId: currentDeck, events: [{ type: 'session_complete', correct: correct, wrong: wrong, total: currentCards.length, direction: direction }] }); } catch(e){}
+  try { KoreanSuiteLogger.log('flashcards', { deckId: currentDeck, events: [{ type: 'session_complete', correct: correct, wrong: wrong, total: currentCards.length, direction: direction, modality: 'production', items: itemsThisSession }] }); } catch(e){}
   const pct = Math.round((correct / currentCards.length) * 100);
   document.getElementById('scoreBig').textContent = pct + '%';
   document.getElementById('scoreDetail').textContent = `${correct} correct · ${wrong} incorrect · ${currentCards.length} total`;
@@ -536,7 +543,7 @@ function onEnd() {
     ci.style.transform = `translateX(${dir * 500}px) rotate(${dir * 20}deg)`;
     ci.style.opacity = '0';
     labelL.style.opacity = 0; labelR.style.opacity = 0;
-    setTimeout(() => { currentIndex++; if (dir > 0) correct++; else wrong++; if (currentIndex >= currentCards.length) showScore(); else showCard(); }, 260);
+    setTimeout(() => { recordItem(currentCards[currentIndex], dir > 0); currentIndex++; if (dir > 0) correct++; else wrong++; if (currentIndex >= currentCards.length) showScore(); else showCard(); }, 260);
   } else { resetCard(); }
 }
 

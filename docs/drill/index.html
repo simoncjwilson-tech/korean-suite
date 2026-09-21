@@ -565,6 +565,7 @@ let session = [];
 let currentIdx = 0;
 let sessionCorrect = 0;
 let missedThisSession = [];
+let itemsThisSession = []; // per-item results for error logging: {id, given, expected, correct}
 
 const stage = document.getElementById('stage');
 const progress = document.getElementById('progress');
@@ -620,6 +621,7 @@ function buildSession() {
   currentIdx = 0;
   sessionCorrect = 0;
   missedThisSession = [];
+  itemsThisSession = [];
 }
 
 function startSession(deck) {
@@ -656,6 +658,7 @@ function handleAnswer(btn, chosen, card) {
   allBtns.forEach(b => b.disabled = true);
 
   const isCorrect = chosen === card.en;
+  itemsThisSession.push({ id: card.ko, given: chosen, expected: card.en, correct: isCorrect });
   if (isCorrect) {
     btn.classList.add('correct');
     sessionCorrect++;
@@ -679,7 +682,7 @@ function nextCard() {
 }
 
 function renderDone() {
-  try { KoreanSuiteLogger.log('drill', { deckId: activeDeck && activeDeck.id, events: [{ type: 'session_complete', correct: sessionCorrect, total: session.length, missed: missedThisSession.length }] }); } catch(e){}
+  try { KoreanSuiteLogger.log('drill', { deckId: activeDeck && activeDeck.id, events: [{ type: 'session_complete', correct: sessionCorrect, total: session.length, missed: missedThisSession.length, modality: 'production', items: itemsThisSession }] }); } catch(e){}
   progress.textContent = `${session.length} / ${session.length}`;
   const reviewHtml = missedThisSession.length
     ? `<div class="review-section">
